@@ -4,8 +4,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllers();
-builder.Services.AddAppServices();
+//builder.Services.AddAppServices();
 
+builder.Services.AddAutomaticAppServices();
+//After Here you Can Override
 
 
 

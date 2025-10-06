@@ -11,5 +11,21 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+    public static IServiceCollection AddAutomaticAppServices(this IServiceCollection services)
+    {
+        services.Scan(scan => scan
+      .FromAssembliesOf(typeof(IScopedService))
+      .AddClasses(classes => classes.AssignableTo<IScopedService>())
+          .AsImplementedInterfaces()
+          .WithScopedLifetime()
+      .AddClasses(classes => classes.AssignableTo<ISingletonService>())
+          .AsImplementedInterfaces()
+          .WithSingletonLifetime()
+      .AddClasses(classes => classes.AssignableTo<ITransientService>())
+          .AsImplementedInterfaces()
+          .WithTransientLifetime()
+  );
+        return services;
+    }
 }
 

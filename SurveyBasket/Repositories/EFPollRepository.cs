@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Repositories;
 
-internal class EFPollRepository : IPollRepository
+public class EFPollRepository : IPollRepository
 {
     private readonly List<Poll> _polls = [
 
