@@ -83,11 +83,16 @@ public static class ServiceCollectionExtensions
     // ------------------ JWT AUTH ------------------
     private static IServiceCollection AddJwtConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()
-            ?? throw new InvalidOperationException("JwtSettings section is missing in configuration.");
 
-        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
+        services.AddOptions<JwtSettings>()
+            .BindConfiguration(JwtSettings.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+
+        var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+           ?? throw new InvalidOperationException("JwtSettings section is missing in configuration.");
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
