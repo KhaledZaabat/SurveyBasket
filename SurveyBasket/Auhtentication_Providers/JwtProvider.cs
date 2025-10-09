@@ -46,8 +46,53 @@ public class JwtProvider(IOptions<JwtSettings> jwtOptions) : IJwtProvider
         var token = handler.CreateToken(tokenDescriptor);
 
         return new TokenResponse(
-            JwtToken: handler.WriteToken(token),
+            Token: handler.WriteToken(token),
             ExpiresAt: expiresAt
         );
     }
+    public string? ValidateToken(string token)
+    {
+        JwtSettings _jwtSettings = jwtOptions.Value;
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+
+        try
+        {
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = key,
+
+                ValidateIssuer = true,
+                ValidIssuer = _jwtSettings.Issuer,
+
+                ValidateAudience = true,
+                ValidAudience = _jwtSettings.Audience,
+
+                ValidateLifetime = true, // Reject expired tokens
+                ClockSkew = TimeSpan.Zero // No grace period
+            };
+
+            // Validate the token and get the validated security token
+            tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+
+            if (validatedToken is not JwtSecurityToken jwtToken)
+                return null;
+
+            //  verify the algorithm if needed
+            if (jwtToken.Header.Alg != SecurityAlgorithms.HmacSha256)
+                return null;
+
+            // Extract and return the Subject ("sub") claim — typically the User ID
+            return jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+        }
+        catch
+        {
+            // If validation fails for any reason (expired, tampered, etc.)
+            return null;
+        }
+    }
+
 }

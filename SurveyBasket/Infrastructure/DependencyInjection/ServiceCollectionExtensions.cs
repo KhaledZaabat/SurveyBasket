@@ -92,7 +92,7 @@ public static class ServiceCollectionExtensions
 
 
         var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
-           ?? throw new InvalidOperationException("JwtSettings section is missing in configuration.");
+           ?? throw new InvalidOperationException($"{JwtSettings.SectionName} Section is missing in configuration.");
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

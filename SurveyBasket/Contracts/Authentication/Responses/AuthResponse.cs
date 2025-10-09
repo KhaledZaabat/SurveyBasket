@@ -5,5 +5,6 @@ public record AuthResponse(
     string? Email,
     string FirstName,
     string LastName,
-    TokenResponse Token
+    TokenResponse JwtToken,
+    TokenResponse RefreshToken
 );

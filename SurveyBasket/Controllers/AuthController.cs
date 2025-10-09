@@ -11,7 +11,7 @@ namespace SurveyBasket.Controllers
         public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
         {
 
-            AuthResponse? response = await _service.Login(request);
+            AuthResponse? response = await _service.LoginAsync(request);
 
 
             if (response == null)
@@ -27,7 +27,7 @@ namespace SurveyBasket.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
 
-            (bool succeded, IEnumerable<IdentityError>? errors) result = await _service.Register(request);
+            (bool succeded, IEnumerable<IdentityError>? errors) result = await _service.RegisterAsync(request);
 
 
 
@@ -37,6 +37,18 @@ namespace SurveyBasket.Controllers
             return BadRequest(result.errors);
 
 
+
+        }
+
+        [HttpPost("refresh")]
+
+        public async Task<ActionResult<AuthResponse>> Refresh(RefreshRequest request)
+        {
+            AuthResponse? response = await _service.RefreshAsync(request);
+            if (response is null)
+                return BadRequest(new { message = "Invalid or expired refresh token." });
+
+            return Ok(response);
 
         }
 
