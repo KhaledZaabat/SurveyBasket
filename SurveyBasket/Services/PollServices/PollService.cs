@@ -1,30 +1,43 @@
-﻿namespace SurveyBasket.Services.PollServices;
+﻿using Mapster;
+using SurveyBasket.Contracts.Polls.Requests;
+using SurveyBasket.Contracts.Polls.Responses;
 
-public class PollService(IPollRepository _pollRepository) : IPollService
+namespace SurveyBasket.Services.PollServices;
+
+public class PollService(IPollRepository pollRepository) : IPollService
 {
-
-
-    public ICollection<Poll> GetAll()
+    public async Task<List<PollResponse>> GetAll(CancellationToken token = default)
     {
-        return _pollRepository.GetAll();
+        List<Poll> polls = await pollRepository.GetAll(token);
+        return polls.Adapt<List<PollResponse>>();
     }
 
-    public Poll? GetById(int id)
+    public async Task<PollResponse?> GetById(int id, CancellationToken token = default)
     {
-        return _pollRepository?.GetById(id);
-    }
-    public Poll? Add(Poll poll)
-    {
-        return _pollRepository?.Add(poll);
+        var poll = await pollRepository.GetById(id, token);
+        return poll?.Adapt<PollResponse>();
     }
 
-    public bool Update(int id, Poll poll)
+    public async Task<PollResponse> Add(CreatePollRequest request, CancellationToken token = default)
     {
-        return _pollRepository.Update(id, poll);
+        var poll = request.Adapt<Poll>();
+        var addedPoll = await pollRepository.Add(poll, token);
+        return addedPoll.Adapt<PollResponse>();
     }
-    public bool Delete(int id)
+
+    public async Task<bool> Update(int id, UpdatePollRequest request, CancellationToken token = default)
     {
-        return _pollRepository.Delete(id);
+        var poll = request.Adapt<Poll>();
+        return await pollRepository.Update(id, poll, token);
     }
+
+    public Task<bool> Delete(int id, CancellationToken token = default)
+    {
+        return pollRepository.Delete(id, token);
+    }
+    public Task<bool> TogglePublish(int id, CancellationToken cancellationToken = default)
+    {
+        return pollRepository.TogglePublish(id, cancellationToken);
+    }
+
 }
-
