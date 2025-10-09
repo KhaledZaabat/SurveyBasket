@@ -1,4 +1,6 @@
-﻿namespace SurveyBasket.Repositories;
+﻿using SurveyBasket.Domain.Entities;
+
+namespace SurveyBasket.Repositories;
 
 public interface IPollRepository : IScopedService
 {

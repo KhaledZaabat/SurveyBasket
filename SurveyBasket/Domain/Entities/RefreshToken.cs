@@ -1,4 +1,4 @@
-﻿namespace SurveyBasket.Models;
+﻿namespace SurveyBasket.Domain.Entities;
 
 
 [Owned]

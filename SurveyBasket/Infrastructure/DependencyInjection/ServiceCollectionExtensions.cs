@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using SurveyBasket.Persistence.Interceptors;
 using System.Text;
 
 namespace SurveyBasket.Infrastructure.DependencyInjection;
@@ -36,8 +37,16 @@ public static class ServiceCollectionExtensions
     // ------------------ DATABASE ------------------
     private static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHttpContextAccessor();
+        services.AddSingleton<AuditAbleInterceptor>();
+
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-        services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+        services.AddDbContext<AppDbContext>((sp, options) =>
+    options
+        .UseSqlServer(connectionString)
+
+        .AddInterceptors(sp.GetRequiredService<AuditAbleInterceptor>())
+);
         return services;
     }
 

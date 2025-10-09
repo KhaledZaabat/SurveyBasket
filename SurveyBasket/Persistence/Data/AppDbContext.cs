@@ -1,5 +1,7 @@
 ﻿
 
+using SurveyBasket.Domain.Entities;
+
 namespace SurveyBasket.Persistence.Data;
 
 public class AppDbContext : IdentityDbContext<ApplicationUser>

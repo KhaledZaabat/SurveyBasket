@@ -1,6 +1,7 @@
 ﻿using Mapster;
 using SurveyBasket.Contracts.Polls.Requests;
 using SurveyBasket.Contracts.Polls.Responses;
+using SurveyBasket.Domain.Entities;
 
 namespace SurveyBasket.Services.PollServices;
 

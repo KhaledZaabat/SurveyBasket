@@ -1,4 +1,6 @@
-﻿namespace SurveyBasket.Auhtentication_Providers
+﻿using SurveyBasket.Domain.Entities;
+
+namespace SurveyBasket.Auhtentication_Providers
 {
     public interface IJwtProvider : ISingletonService
     {

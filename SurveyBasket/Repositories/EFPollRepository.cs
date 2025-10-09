@@ -1,6 +1,8 @@
-﻿namespace SurveyBasket.Repositories;
+﻿using System.Security.Claims;
 
-public class EFPollRepository(AppDbContext db) : IPollRepository
+namespace SurveyBasket.Repositories;
+
+public class EFPollRepository(AppDbContext db, IHttpContextAccessor accessor) : IPollRepository
 {
 
     public async Task<Poll> Add(Poll poll, CancellationToken token = default)
@@ -23,13 +25,18 @@ public class EFPollRepository(AppDbContext db) : IPollRepository
 
     public async Task<bool> Update(int id, Poll poll, CancellationToken token = default)
     {
+        var currentUserId = accessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         var rowsAffected = await db.Polls
             .Where(p => p.Id == id)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(p => p.Title, poll.Title)
                 .SetProperty(p => p.Summary, poll.Summary)
                 .SetProperty(p => p.EndsAt, poll.EndsAt)
-                .SetProperty(p => p.StartsAt, poll.StartsAt), token);
+                .SetProperty(p => p.StartsAt, poll.StartsAt)
+              .SetProperty(p => p.UpdatedOn, DateTime.UtcNow)
+                    .SetProperty(p => p.UpdatedById, currentUserId),
+                    token);
         return rowsAffected > 0;
     }
 

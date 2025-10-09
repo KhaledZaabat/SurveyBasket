@@ -1,5 +1,6 @@
 ﻿namespace SurveyBasket.Persistence.ModelsConfigurations;
 
+using SurveyBasket.Domain.Entities;
 public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
 {
     public void Configure(EntityTypeBuilder<ApplicationUser> builder)
@@ -14,7 +15,7 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
 
 
         });
-        builder.Property(x => x.FirstName).HasMaxLength(100);
-        builder.Property(x => x.LastName).HasMaxLength(100);
+
+
     }
 }
