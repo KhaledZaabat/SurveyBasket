@@ -8,14 +8,13 @@ namespace SurveyBasket.Services.Authentication
     {
         private const int RefreshTokenLifetimeDays = 14;
 
-        public async Task<AuthResponse?> LoginAsync(LoginRequest request)
+        public async Task<Result<AuthResponse>> LoginAsync(LoginRequest request)
         {
             var user = await userManager.FindByEmailAsync(request.Email);
-            if (user is null) return null;
-
-            bool isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
-            if (!isPasswordValid) return null;
-
+            if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
+            {
+                return Result.Failure<AuthResponse>(Error.InvalidCredentials());
+            }
             var jwtToken = jwtProvider.GenerateToken(user);
             var refreshToken = GenerateRefreshToken();
 
@@ -29,26 +28,25 @@ namespace SurveyBasket.Services.Authentication
 
             await userManager.UpdateAsync(user);
 
-            return new AuthResponse(
+            return Result<AuthResponse>.Success<AuthResponse>(new AuthResponse(
                 Id: user.Id,
                 Email: user.Email!,
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 JwtToken: jwtToken,
                 RefreshToken: refreshToken
-            );
+            ));
         }
 
-        public async Task<AuthResponse?> RefreshAsync(RefreshRequest request)
+        public async Task<Result<AuthResponse>> RefreshAsync(RefreshRequest request)
         {
             string? userId = jwtProvider.ValidateToken(request.JwtToken);
-            if (userId is null) return null;
+            if (userId is null) return Result.Failure<AuthResponse>(Error.InvalidToken("Invalid or expired JWT token"));
 
             var user = await userManager.FindByIdAsync(userId);
-            if (user is null) return null;
-
+            if (user is null) return Result.Failure<AuthResponse>(Error.InvalidCredentials());
             var oldToken = user.RefreshTokens.FirstOrDefault(t => t.Token == request.RefreshToken && t.IsActive);
-            if (oldToken is null) return null;
+            if (oldToken is null) return Result.Failure<AuthResponse>(Error.InvalidToken("Invalid or expired refresh token"));
 
             // Revoke the old refresh token
             oldToken.RevokedOn = DateTime.UtcNow;
@@ -66,17 +64,17 @@ namespace SurveyBasket.Services.Authentication
 
             await userManager.UpdateAsync(user);
 
-            return new AuthResponse(
+            return Result.Success<AuthResponse>(new AuthResponse(
                 Id: user.Id,
                 Email: user.Email!,
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 JwtToken: newJwtToken,
                 RefreshToken: newRefreshToken
-            );
+            ));
         }
 
-        public async Task<(bool Succeeded, IEnumerable<IdentityError>? Errors)> RegisterAsync(RegisterRequest request)
+        public async Task<Result> RegisterAsync(RegisterRequest request)
         {
             var user = new ApplicationUser
             {
@@ -89,12 +87,16 @@ namespace SurveyBasket.Services.Authentication
             var result = await userManager.CreateAsync(user, request.Password);
 
             if (!result.Succeeded)
-                return (false, result.Errors);
+            {
+
+                var description = string.Join("; ", result.Errors.Select(e => e.Description));
+                return Result.Failure(Error.Validation(description));
+            }
 
             // Optionally assign a role in future
             // await userManager.AddToRoleAsync(user, "User");
 
-            return (true, null);
+            return Result.Success();
         }
 
         private static TokenResponse GenerateRefreshToken()

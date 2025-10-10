@@ -1,57 +1,48 @@
-﻿using Microsoft.AspNetCore.Identity;
-using SurveyBasket.Services.Authentication;
+﻿using SurveyBasket.Services.Authentication;
 
-namespace SurveyBasket.Controllers
+namespace SurveyBasket.Controllers;
+
+[Route("[controller]")]
+[ApiController]
+public class AuthController(IAuthService _service) : ControllerBase
 {
-    [Route("[controller]")]
-    [ApiController]
-    public class AuthController(IAuthService _service) : ControllerBase
+    [HttpPost("login")]
+    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
     {
-        [HttpPost("login")]
-        public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
+        Result<AuthResponse> result = await _service.LoginAsync(request);
+
+        return result switch
         {
+            SuccessResult<AuthResponse> success => Ok(success.Value),
+            FailureResult<AuthResponse> failure => StatusCode(failure.Error.StatusCode, new { failure.Error.Description }),
+            _ => StatusCode(500, new { message = "Unknown error" })
+        };
+    }
 
-            AuthResponse? response = await _service.LoginAsync(request);
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    {
+        Result result = await _service.RegisterAsync(request);
 
-
-            if (response == null)
-            {
-                return Unauthorized(new { message = "Invalid email or password." });
-            }
-
-
-            return Ok(response);
-        }
-
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        return result switch
         {
+            SuccessResult => Ok(new { message = "User created successfully" }),
+            FailureResult failure => StatusCode(failure.Error.StatusCode, new { failure.Error.Description }),
+            _ => StatusCode(500, new { message = "Unknown error" })
+        };
+    }
 
-            (bool succeded, IEnumerable<IdentityError>? errors) result = await _service.RegisterAsync(request);
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponse>> Refresh([FromBody] RefreshRequest request)
+    {
+        Result<AuthResponse> result = await _service.RefreshAsync(request);
 
-
-
-            if (result.succeded)
-                return Ok(new { message = "User created successfully" });
-
-            return BadRequest(result.errors);
-
-
-
-        }
-
-        [HttpPost("refresh")]
-
-        public async Task<ActionResult<AuthResponse>> Refresh(RefreshRequest request)
+        return result switch
         {
-            AuthResponse? response = await _service.RefreshAsync(request);
-            if (response is null)
-                return BadRequest(new { message = "Invalid or expired refresh token." });
-
-            return Ok(response);
-
-        }
-
-
+            SuccessResult<AuthResponse> success => Ok(success.Value),
+            FailureResult<AuthResponse> failure => StatusCode(failure.Error.StatusCode, new { failure.Error.Description }),
+            _ => StatusCode(500, new { message = "Unknown error" })
+        };
     }
 }
+
