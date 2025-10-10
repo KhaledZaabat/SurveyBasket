@@ -1,8 +1,6 @@
-﻿using System.Security.Claims;
+﻿namespace SurveyBasket.Repositories;
 
-namespace SurveyBasket.Repositories;
-
-public class EFPollRepository(AppDbContext db, IHttpContextAccessor accessor) : IPollRepository
+public class EFPollRepository(AppDbContext db) : IPollRepository
 {
 
     public async Task<Poll> Add(Poll poll, CancellationToken token = default)
@@ -25,19 +23,18 @@ public class EFPollRepository(AppDbContext db, IHttpContextAccessor accessor) : 
 
     public async Task<bool> Update(int id, Poll poll, CancellationToken token = default)
     {
-        var currentUserId = accessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var existingPoll = await db.Polls.FindAsync(new object[] { id }, token);
 
-        var rowsAffected = await db.Polls
-            .Where(p => p.Id == id)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(p => p.Title, poll.Title)
-                .SetProperty(p => p.Summary, poll.Summary)
-                .SetProperty(p => p.EndsAt, poll.EndsAt)
-                .SetProperty(p => p.StartsAt, poll.StartsAt)
-              .SetProperty(p => p.UpdatedOn, DateTime.UtcNow)
-                    .SetProperty(p => p.UpdatedById, currentUserId),
-                    token);
-        return rowsAffected > 0;
+        if (existingPoll is null)
+            return false;
+
+        existingPoll.Title = poll.Title;
+        existingPoll.Summary = poll.Summary;
+        existingPoll.EndsAt = poll.EndsAt;
+        existingPoll.StartsAt = poll.StartsAt;
+
+        await db.SaveChangesAsync(token);
+        return true;
     }
 
 
