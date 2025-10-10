@@ -41,7 +41,7 @@ namespace SurveyBasket.Services.Authentication
         public async Task<Result<AuthResponse>> RefreshAsync(RefreshRequest request)
         {
             string? userId = jwtProvider.ValidateToken(request.JwtToken);
-            if (userId is null) return Result.Failure<AuthResponse>(UserError.InvalidToken("Invalid or expired JWT token"));
+            if (userId is null) return Result.Failure<AuthResponse>(UserError.InvalidToken("Invalid or expired Jwt token"));
 
             var user = await userManager.FindByIdAsync(userId);
             if (user is null) return Result.Failure<AuthResponse>(UserError.InvalidCredentials());

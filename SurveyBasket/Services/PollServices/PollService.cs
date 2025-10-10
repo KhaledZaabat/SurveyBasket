@@ -1,44 +1,58 @@
 ﻿using Mapster;
-using SurveyBasket.Contracts.Polls.Requests;
 using SurveyBasket.Contracts.Polls.Responses;
-using SurveyBasket.Domain.Entities;
 
 namespace SurveyBasket.Services.PollServices;
 
 public class PollService(IPollRepository pollRepository) : IPollService
 {
-    public async Task<List<PollResponse>> GetAll(CancellationToken token = default)
+    public async Task<Result<List<PollResponse>>> GetAll(CancellationToken token = default)
     {
         List<Poll> polls = await pollRepository.GetAll(token);
-        return polls.Adapt<List<PollResponse>>();
+
+
+        return Result.Success<List<PollResponse>>(polls.Adapt<List<Poll>, List<PollResponse>>());
     }
 
-    public async Task<PollResponse?> GetById(int id, CancellationToken token = default)
+    public async Task<Result<PollResponse>> GetById(int id, CancellationToken token = default)
     {
-        var poll = await pollRepository.GetById(id, token);
-        return poll?.Adapt<PollResponse>();
+        Poll? poll = await pollRepository.GetById(id, token);
+        if (poll == null) return Result<PollResponse>.Failure<PollResponse>(PollError.NotFound());
+        return Result.Success<PollResponse>(poll.Adapt<Poll, PollResponse>());
     }
 
-    public async Task<PollResponse> Add(CreatePollRequest request, CancellationToken token = default)
+    public async Task<Result<PollResponse>> Add(CreatePollRequest request, CancellationToken token = default)
     {
-        var poll = request.Adapt<Poll>();
-        var addedPoll = await pollRepository.Add(poll, token);
-        return addedPoll.Adapt<PollResponse>();
+        Poll poll = request.Adapt<CreatePollRequest, Poll>();
+        Poll? addedPoll = await pollRepository.Add(poll, token);
+        if (addedPoll is null) return Result.Failure<PollResponse>(PollError.Conflict());
+
+
+        return Result.Success<PollResponse>(addedPoll!.Adapt<Poll, PollResponse>());
     }
 
-    public async Task<bool> Update(int id, UpdatePollRequest request, CancellationToken token = default)
+    public async Task<Result> Update(int id, UpdatePollRequest request, CancellationToken token = default)
     {
-        var poll = request.Adapt<Poll>();
-        return await pollRepository.Update(id, poll, token);
+        Poll poll = request.Adapt<Poll>();
+        bool Updated = await pollRepository.Update(id, poll, token);
+        if (!Updated)
+        {
+            return Result.Failure(PollError.NotFound());
+        }
+
+        return Result.Success();
     }
 
-    public Task<bool> Delete(int id, CancellationToken token = default)
+    public async Task<Result> Delete(int id, CancellationToken token = default)
     {
-        return pollRepository.Delete(id, token);
+        bool Deleted = await pollRepository.Delete(id, token);
+        if (!Deleted) return Result.Failure(PollError.NotFound());
+        return Result.Success();
     }
-    public Task<bool> TogglePublish(int id, CancellationToken cancellationToken = default)
+    public async Task<Result> TogglePublish(int id, CancellationToken cancellationToken = default)
     {
-        return pollRepository.TogglePublish(id, cancellationToken);
+        PublishStatus ToggledStatus = await pollRepository.TogglePublish(id, cancellationToken);
+        if (ToggledStatus is null) return Result.Failure(PollError.NotFound());
+        return Result.Success();
     }
 
 }

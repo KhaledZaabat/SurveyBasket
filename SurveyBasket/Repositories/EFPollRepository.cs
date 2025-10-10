@@ -3,27 +3,34 @@
 public class EFPollRepository(AppDbContext db) : IPollRepository
 {
 
-    public async Task<Poll> Add(Poll poll, CancellationToken token = default)
+    public async Task<Poll> Add(Poll poll, CancellationToken cancellationToken = default)
     {
-        await db.Polls.AddAsync(poll, token);
-        await db.SaveChangesAsync(token);
+        bool exists = await db.Polls
+         .AnyAsync(p => p.Title == poll.Title, cancellationToken); // assuming Title is unique
+
+        if (exists)
+            return null;
+
+        await db.Polls.AddAsync(poll, cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
+
         return poll;
     }
 
 
-    public Task<int> Count(CancellationToken token) => db.Polls.CountAsync(token = default);
+    public Task<int> Count(CancellationToken cancellationToken = default) => db.Polls.CountAsync(cancellationToken);
 
 
-    public Task<List<Poll>> GetAll(CancellationToken token) =>
-        db.Polls.AsNoTracking().ToListAsync(token);
+    public Task<List<Poll>> GetAll(CancellationToken cancellationToken) =>
+        db.Polls.AsNoTracking().ToListAsync(cancellationToken);
 
 
-    public Task<Poll?> GetById(int id, CancellationToken token) => db.Polls.FindAsync(id, token).AsTask();
+    public Task<Poll?> GetById(int id, CancellationToken cancellationToken) => db.Polls.FindAsync(id, cancellationToken).AsTask();
 
 
-    public async Task<bool> Update(int id, Poll poll, CancellationToken token = default)
+    public async Task<bool> Update(int id, Poll poll, CancellationToken cancellationToken = default)
     {
-        var existingPoll = await db.Polls.FindAsync(new object[] { id }, token);
+        var existingPoll = await db.Polls.FindAsync(new object[] { id }, cancellationToken);
 
         if (existingPoll is null)
             return false;
@@ -33,7 +40,7 @@ public class EFPollRepository(AppDbContext db) : IPollRepository
         existingPoll.EndsAt = poll.EndsAt;
         existingPoll.StartsAt = poll.StartsAt;
 
-        await db.SaveChangesAsync(token);
+        await db.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -45,13 +52,17 @@ public class EFPollRepository(AppDbContext db) : IPollRepository
             .ExecuteDeleteAsync(token);
         return rowsAffected > 0;
     }
-    public async Task<bool> TogglePublish(int id, CancellationToken cancellationToken = default)
+    public async Task<PublishStatus?> TogglePublish(int id, CancellationToken cancellationToken = default)
     {
-        var rowsAffected = await db.Polls
-            .Where(p => p.Id == id)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(p => p.IsPublished, p => !p.IsPublished),
-                cancellationToken);
-        return rowsAffected > 0;
+        var existingPoll = await db.Polls.FindAsync(new object[] { id }, cancellationToken);
+
+        if (existingPoll is null)
+            return null;
+
+        existingPoll.Status = new PublishStatus(!existingPoll.Status.IsPublished);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return existingPoll.Status;
+
     }
 }

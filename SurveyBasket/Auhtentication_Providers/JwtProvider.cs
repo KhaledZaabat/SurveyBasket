@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using SurveyBasket.Domain.Entities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -58,42 +57,39 @@ public class JwtProvider(IOptions<JwtSettings> jwtOptions) : IJwtProvider
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
 
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = key,
+            ValidateIssuer = true,
+            ValidIssuer = _jwtSettings.Issuer,
+            ValidateAudience = true,
+            ValidAudience = _jwtSettings.Audience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+
         try
         {
 
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = key,
-
-                ValidateIssuer = true,
-                ValidIssuer = _jwtSettings.Issuer,
-
-                ValidateAudience = true,
-                ValidAudience = _jwtSettings.Audience,
-
-                ValidateLifetime = true, // Reject expired tokens
-                ClockSkew = TimeSpan.Zero // No grace period
-            };
-
-            // Validate the token and get the validated security token
             tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
 
-            if (validatedToken is not JwtSecurityToken jwtToken)
+            if (validatedToken is not JwtSecurityToken jwtToken ||
+                jwtToken.Header.Alg != SecurityAlgorithms.HmacSha256)
                 return null;
 
-            //  verify the algorithm if needed
-            if (jwtToken.Header.Alg != SecurityAlgorithms.HmacSha256)
-                return null;
+            return jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+        }
+        catch (SecurityTokenExpiredException)
+        {
 
-            // Extract and return the Subject ("sub") claim — typically the User ID
+            var jwtToken = tokenHandler.ReadJwtToken(token);
             return jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
         }
         catch
         {
-            // If validation fails for any reason (expired, tampered, etc.)
+
             return null;
         }
     }
-
 }

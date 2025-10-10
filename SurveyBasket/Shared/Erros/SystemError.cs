@@ -12,7 +12,6 @@ public sealed record SystemError(int StatusCode, string Code, string Description
     public static SystemError ExternalService(string description = "External service error")
         => new(502, "System.ExternalService", description);
 }
-
 //public sealed record Error(int StatusCode, string Description)
 //{
 //    public static readonly Error None = new(200, string.Empty);

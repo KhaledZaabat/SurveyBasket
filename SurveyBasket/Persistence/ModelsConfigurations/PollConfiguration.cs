@@ -22,6 +22,14 @@ public class PollConfiguration : IEntityTypeConfiguration<Poll>
              .IsRequired(false)
              .OnDelete(DeleteBehavior.SetNull);
 
+        builder.OwnsOne(o => o.Status, st =>
+        {
 
+            st.Property(s => s.IsPublished).HasColumnName("IsPublished").IsRequired();
+        }
+
+
+
+            );
     }
 }

@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Domain.Entities;
-
-namespace SurveyBasket.Repositories;
+﻿namespace SurveyBasket.Repositories;
 
 public interface IPollRepository : IScopedService
 {
@@ -11,6 +9,6 @@ public interface IPollRepository : IScopedService
     public Task<bool> Update(int id, Poll poll, CancellationToken token = default);
     public Task<bool> Delete(int id, CancellationToken token = default);
     public Task<int> Count(CancellationToken token = default);
-    Task<bool> TogglePublish(int id, CancellationToken cancellationToken = default);
+    Task<PublishStatus> TogglePublish(int id, CancellationToken cancellationToken = default);
 
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Mapster;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Persistence.Interceptors;
@@ -10,13 +11,15 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        return services
-            .AddControllersConfiguration()
-            .AddValidationConfiguration()
-            .AddDatabaseConfiguration(configuration)
-            .AddAssemblyScanningConfiguration()
-            .AddIdentityConfiguration()
-            .AddJwtConfiguration(configuration);
+        services
+           .AddControllersConfiguration()
+           .AddValidationConfiguration()
+           .AddDatabaseConfiguration(configuration)
+           .AddAssemblyScanningConfiguration()
+           .AddIdentityConfiguration()
+           .AddJwtConfiguration(configuration)
+           .ConfigureMappings();
+        return services;
     }
 
     // ------------------ CONTROLLERS ------------------
@@ -122,6 +125,11 @@ public static class ServiceCollectionExtensions
             };
         });
 
+        return services;
+    }
+    private static IServiceCollection ConfigureMappings(this IServiceCollection services)
+    {
+        TypeAdapterConfig.GlobalSettings.Scan(AppDomain.CurrentDomain.GetAssemblies());
         return services;
     }
 }
