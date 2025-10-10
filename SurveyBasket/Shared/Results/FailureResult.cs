@@ -1,4 +1,4 @@
-﻿using SurveyBasket.Shared.Results;
+﻿
 
 public sealed record FailureResult(Error Error) : Result(false, Error);
 

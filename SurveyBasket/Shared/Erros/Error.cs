@@ -1,5 +1,15 @@
-﻿namespace SurveyBasket.Shared.Results;
+﻿namespace SurveyBasket.Shared.Erros;
 
+
+public abstract record Error(int StatusCode, string Code, string Description)
+{
+    public static readonly Error None = new GenericError(200, "None", string.Empty);
+
+    public override string ToString() => $"{Code} ({StatusCode}): {Description}";
+};
+
+
+/*
 public sealed record Error(int StatusCode, string Description)
 {
     public static readonly Error None = new(200, string.Empty);
@@ -15,3 +25,6 @@ public sealed record Error(int StatusCode, string Description)
     public static Error Failure(string description = "Internal server error") => new(500, description);
     public override string ToString() => $"{StatusCode}: {Description}";
 }
+
+
+*/

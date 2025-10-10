@@ -14,5 +14,6 @@ global using SurveyBasket.Persistence.Data;
 global using SurveyBasket.Repositories;
 global using SurveyBasket.Services.PollServices;
 global using SurveyBasket.Services.ServiceRegistrationServices;
+global using SurveyBasket.Shared.Erros;
 global using SurveyBasket.Shared.Results;
 global using System.Reflection;

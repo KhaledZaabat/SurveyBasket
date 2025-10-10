@@ -13,7 +13,7 @@ namespace SurveyBasket.Services.Authentication
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
             {
-                return Result.Failure<AuthResponse>(Error.InvalidCredentials());
+                return Result.Failure<AuthResponse>(UserError.InvalidCredentials());
             }
             var jwtToken = jwtProvider.GenerateToken(user);
             var refreshToken = GenerateRefreshToken();
@@ -41,12 +41,12 @@ namespace SurveyBasket.Services.Authentication
         public async Task<Result<AuthResponse>> RefreshAsync(RefreshRequest request)
         {
             string? userId = jwtProvider.ValidateToken(request.JwtToken);
-            if (userId is null) return Result.Failure<AuthResponse>(Error.InvalidToken("Invalid or expired JWT token"));
+            if (userId is null) return Result.Failure<AuthResponse>(UserError.InvalidToken("Invalid or expired JWT token"));
 
             var user = await userManager.FindByIdAsync(userId);
-            if (user is null) return Result.Failure<AuthResponse>(Error.InvalidCredentials());
+            if (user is null) return Result.Failure<AuthResponse>(UserError.InvalidCredentials());
             var oldToken = user.RefreshTokens.FirstOrDefault(t => t.Token == request.RefreshToken && t.IsActive);
-            if (oldToken is null) return Result.Failure<AuthResponse>(Error.InvalidToken("Invalid or expired refresh token"));
+            if (oldToken is null) return Result.Failure<AuthResponse>(UserError.InvalidToken("Invalid or expired refresh token"));
 
             // Revoke the old refresh token
             oldToken.RevokedOn = DateTime.UtcNow;
@@ -90,7 +90,7 @@ namespace SurveyBasket.Services.Authentication
             {
 
                 var description = string.Join("; ", result.Errors.Select(e => e.Description));
-                return Result.Failure(Error.Validation(description));
+                return Result.Failure(ValidationError.InvalidInput(description));
             }
 
             // Optionally assign a role in future

@@ -1,4 +1,6 @@
-﻿namespace SurveyBasket.Shared.Results;
+﻿
+
+namespace SurveyBasket.Shared.Results;
 
 public sealed record SuccessResult() : Result(true, Error.None);
 public sealed record SuccessResult<T> : Result<T>

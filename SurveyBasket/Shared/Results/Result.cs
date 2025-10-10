@@ -1,4 +1,6 @@
 ﻿
+
+
 namespace SurveyBasket.Shared.Results;
 
 public abstract record Result
