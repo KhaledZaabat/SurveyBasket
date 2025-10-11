@@ -2,13 +2,13 @@
 
 public interface IPollRepository : IScopedService
 {
-
-    public Task<List<Poll>> GetAll(CancellationToken token = default);
-    public Task<Poll?> GetById(int id, CancellationToken token = default);
-    public Task<Poll?> Add(Poll poll, CancellationToken token = default);
-    public Task<UpdateResult> Update(int id, Poll poll, CancellationToken token = default);
-    public Task<bool> Delete(int id, CancellationToken token = default);
-    public Task<int> Count(CancellationToken token = default);
-    Task<PublishStatus> TogglePublish(int id, CancellationToken cancellationToken = default);
-
+    Task<Poll?> AddAsync(Poll poll, CancellationToken cancellationToken = default);
+    Task<int> CountAsync(CancellationToken cancellationToken = default);
+    Task<List<Poll>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Poll?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task UpdateAsync(Poll poll, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Poll poll, CancellationToken cancellationToken = default);
+    public Task<bool> ExistById(int id, CancellationToken cancellationToken = default);
+    public Task<bool> ExistByTitle(string title, CancellationToken cancellationToken = default);
+    public Task<bool> ExistByTitleWithDifferentId(string title, int id, CancellationToken cancellationToken = default);
 }

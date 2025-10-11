@@ -32,6 +32,7 @@
 	<ItemGroup>
 	  <Folder Include="Contracts\Answers\Validations\" />
 	  <Folder Include="Contracts\Answers\Requests\" />
+	  <Folder Include="Enums\" />
 	</ItemGroup>
 
 </Project>

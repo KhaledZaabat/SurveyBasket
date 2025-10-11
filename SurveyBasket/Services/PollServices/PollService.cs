@@ -7,54 +7,72 @@ public class PollService(IPollRepository pollRepository) : IPollService
 {
     public async Task<Result<List<PollResponse>>> GetAllAsync(CancellationToken token = default)
     {
-        List<Poll> polls = await pollRepository.GetAll(token);
-
-
-        return Result.Success<List<PollResponse>>(polls.Adapt<List<Poll>, List<PollResponse>>());
+        var polls = await pollRepository.GetAllAsync(token);
+        return Result.Success(polls.Adapt<List<PollResponse>>());
     }
 
     public async Task<Result<PollResponse>> GetByIdAsync(int id, CancellationToken token = default)
     {
-        Poll? poll = await pollRepository.GetById(id, token);
-        if (poll == null) return Result<PollResponse>.Failure<PollResponse>(PollError.NotFound());
-        return Result.Success<PollResponse>(poll.Adapt<Poll, PollResponse>());
+        var poll = await pollRepository.GetByIdAsync(id, token);
+        if (poll is null)
+            return Result.Failure<PollResponse>(PollError.NotFound());
+
+        return Result.Success(poll.Adapt<PollResponse>());
     }
 
     public async Task<Result<PollResponse>> AddAsync(CreatePollRequest request, CancellationToken token = default)
     {
-        Poll poll = request.Adapt<CreatePollRequest, Poll>();
-        Poll? addedPoll = await pollRepository.Add(poll, token);
-        if (addedPoll is null) return Result.Failure<PollResponse>(PollError.Conflict());
 
 
-        return Result.Success<PollResponse>(addedPoll!.Adapt<Poll, PollResponse>());
+        if (await pollRepository.ExistByTitle(request.Title, token))
+            return Result.Failure<PollResponse>(PollError.Conflict());
+
+        var poll = request.Adapt<Poll>();
+        var addedPoll = await pollRepository.AddAsync(poll, token);
+
+        return Result.Success(addedPoll.Adapt<PollResponse>());
     }
 
     public async Task<Result> UpdateAsync(int id, UpdatePollRequest request, CancellationToken token = default)
     {
-        Poll poll = request.Adapt<Poll>();
-        UpdateResult result = await pollRepository.Update(id, poll, token);
+        var poll = await pollRepository.GetByIdAsync(id, token);
+        if (poll is null)
+            return Result.Failure(PollError.NotFound());
 
-        return result switch
-        {
-            UpdateResult.Success => Result.Success(),
-            UpdateResult.NotFound => Result.Failure(PollError.NotFound()),
-            UpdateResult.Conflict => Result.Failure(PollError.Conflict()),
-            _ => Result.Failure(GenericError.Unknown())
-        };
+
+
+        if (await pollRepository.ExistByTitleWithDifferentId(request.Title, id, token))
+            return Result.Failure(PollError.Conflict());
+
+        // Apply updates
+        poll.Title = request.Title;
+        poll.Summary = request.Summary;
+        poll.StartsAt = request.StartsAt;
+        poll.EndsAt = request.EndsAt;
+
+        await pollRepository.UpdateAsync(poll, token);
+        return Result.Success();
     }
 
     public async Task<Result> DeleteAsync(int id, CancellationToken token = default)
     {
-        bool Deleted = await pollRepository.Delete(id, token);
-        if (!Deleted) return Result.Failure(PollError.NotFound());
-        return Result.Success();
-    }
-    public async Task<Result> TogglePublishAsync(int id, CancellationToken cancellationToken = default)
-    {
-        PublishStatus ToggledStatus = await pollRepository.TogglePublish(id, cancellationToken);
-        if (ToggledStatus is null) return Result.Failure(PollError.NotFound());
+        var poll = await pollRepository.GetByIdAsync(id, token);
+        if (poll is null)
+            return Result.Failure(PollError.NotFound());
+
+        await pollRepository.DeleteAsync(poll, token);
         return Result.Success();
     }
 
+    public async Task<Result> TogglePublishAsync(int id, CancellationToken token = default)
+    {
+        var poll = await pollRepository.GetByIdAsync(id, token);
+        if (poll is null)
+            return Result.Failure(PollError.NotFound());
+
+        poll.Status = new PublishStatus(!poll.Status.IsPublished);
+        await pollRepository.UpdateAsync(poll, token);
+
+        return Result.Success();
+    }
 }
