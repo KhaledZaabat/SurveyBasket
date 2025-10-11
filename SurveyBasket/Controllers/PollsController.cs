@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using SurveyBasket.Contracts.Polls.Responses;
-using SurveyBasket.Contracts.Question.Requests;
 using SurveyBasket.Helpers;
 using SurveyBasket.Services.Questions;
 
@@ -59,18 +58,6 @@ public class PollsController(IPollService _pollService, IQuestionService _questi
     }
 
 
-    [HttpPost("{id}/Add")]
 
 
-    public async Task<ActionResult<QuestionResponse>> AddQuestionAsync([FromRoute] int id, [FromBody] CreateQuestionRequest request)
-    {
-
-        Result<QuestionResponse> result = await _questionService.AddAsync(id, request);
-        if (result is SuccessResult<QuestionResponse> valuedResult)
-            return Ok(valuedResult.Value);
-
-        return result.ToProblem();
-
-
-    }
 }

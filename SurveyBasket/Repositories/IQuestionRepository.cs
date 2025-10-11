@@ -2,8 +2,8 @@
 
 public interface IQuestionRepository : IScopedService
 {
-    public Task<Question?> AddAsync(Question question);
-    public Task<Question?> GetWithAnswersAsync(int id);
-    public Task<bool> IsDuplicateQuestionAsync(string content);
+    public Task<Question?> AddAsync(Question question, CancellationToken token = default);
+    public Task<Question?> GetWithAnswersAsync(int id, CancellationToken token = default);
+    public Task<bool> IsDuplicateQuestionAsync(string content, CancellationToken token = default);
 }
 
