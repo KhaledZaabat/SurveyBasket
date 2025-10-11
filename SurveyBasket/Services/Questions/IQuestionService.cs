@@ -4,6 +4,6 @@ namespace SurveyBasket.Services.Questions;
 
 public interface IQuestionService : IScopedService
 {
-    public Task<Result<QuestionResponse>> AddAsync(int id, CreateQuestionRequest request);
+    public Task<Result<QuestionResponse>> AddAsync(int id, CreateQuestionRequest request, CancellationToken token = default);
 }
 

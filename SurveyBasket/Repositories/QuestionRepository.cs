@@ -16,10 +16,7 @@
                 .FirstOrDefaultAsync(q => q.Id == id);
         }
 
-        public async Task<bool> PollExistsAsync(int pollId)
-        {
-            return await db.Polls.AnyAsync(x => x.Id == pollId);
-        }
+
 
         public async Task<bool> IsDuplicateQuestionAsync(string content)
         {
