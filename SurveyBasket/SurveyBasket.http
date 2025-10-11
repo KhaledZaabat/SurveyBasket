@@ -1,5 +1,10 @@
 ﻿@SurveyBasket_HostAddress = https://localhost:7240
 
-GET {{SurveyBasket_HostAddress}}/api/polls
-
-###
+POST {{SurveyBasket_HostAddress}}/Auth/register
+{
+  "email": "john.doe@example.com",
+  "password": "AnotherPass123!",
+  "firstName": "John",
+  "lastName": "Doe"
+  
+}

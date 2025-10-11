@@ -89,7 +89,7 @@ namespace SurveyBasket.Services.Authentication
             if (!result.Succeeded)
             {
 
-                var description = string.Join("; ", result.Errors.Select(e => e.Description));
+                var description = string.Join($"{Environment.NewLine}", result.Errors.Select(e => e.Description));
                 return Result.Failure(ValidationError.InvalidInput(description));
             }
 

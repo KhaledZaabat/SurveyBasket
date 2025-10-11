@@ -17,6 +17,7 @@ public sealed record UserError(int StatusCode, string Code, string Description)
 
     public static UserError Conflict(string description = "Conflict")
         => new(409, "User.Conflict", description);
+
 }
 
 //public sealed record Error(int StatusCode, string Description)

@@ -18,7 +18,8 @@ public static class ServiceCollectionExtensions
            .AddAssemblyScanningConfiguration()
            .AddIdentityConfiguration()
            .AddJwtConfiguration(configuration)
-           .ConfigureMappings();
+           .ConfigureMappings()
+           .ConfigureProblems();
         return services;
     }
 
@@ -132,4 +133,18 @@ public static class ServiceCollectionExtensions
         TypeAdapterConfig.GlobalSettings.Scan(AppDomain.CurrentDomain.GetAssemblies());
         return services;
     }
+
+    private static IServiceCollection ConfigureProblems(this IServiceCollection services)
+    {
+        services.AddProblemDetails(options =>
+        {
+            options.CustomizeProblemDetails = context =>
+            {
+                context.ProblemDetails.Instance =
+                    $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
+            };
+        });
+        return services;
+    }
+
 }
