@@ -8,20 +8,21 @@ namespace SurveyBasket.Controllers
     [ApiController]
     public class QuestionsController(IQuestionService questionService) : ControllerBase
     {
-        [HttpGet("{questionId:int}")]
+
+        [HttpGet]
+        public async Task<ActionResult<ICollection<QuestionResponse>>> GetAllAsync(int pollId
+            , CancellationToken token = default)
+            => (await questionService.GetAllAsync(pollId, token)).ToActionResult();
+
+
+
+        [HttpGet("{questionId}")]
         public async Task<ActionResult<QuestionResponse>> GetByIdAsync(
             [FromRoute] int pollId,
             [FromRoute] int questionId,
             CancellationToken token = default)
-        {
-            //var result = await questionService.GetByIdAsync(pollId, questionId, token);
+            => (await questionService.GetByIdAsync(pollId, questionId, token)).ToActionResult();
 
-            //if (result.IsFailure)
-            //    return NotFound(result.Error);
-
-            // return Ok(result.Value);
-            return Ok();
-        }
         [HttpPost]
         public async Task<ActionResult<QuestionResponse>> AddQuestionAsync([FromRoute] int pollId,
             [FromBody] CreateQuestionRequest request,

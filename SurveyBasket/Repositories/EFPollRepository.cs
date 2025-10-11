@@ -29,11 +29,11 @@ public class EFPollRepository(AppDbContext db) : IPollRepository
         db.Polls.Remove(poll);
         await db.SaveChangesAsync(cancellationToken);
     }
-    public async Task<bool> ExistById(int id, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistByIdAsync(int id, CancellationToken cancellationToken = default)
         => await db.Polls.AnyAsync(e => e.Id == id, cancellationToken);
-    public async Task<bool> ExistByTitle(string title, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistByTitleAsync(string title, CancellationToken cancellationToken = default)
            => await db.Polls.AnyAsync(e => e.Title == title, cancellationToken);
-    public async Task<bool> ExistByTitleWithDifferentId(string title, int id, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistByTitleWithDifferentIdAsync(string title, int id, CancellationToken cancellationToken = default)
      => await db.Polls.AnyAsync(e => e.Title == title && id != e.Id, cancellationToken);
 
 

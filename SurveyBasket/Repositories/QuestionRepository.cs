@@ -9,11 +9,11 @@
             return question;
         }
 
-        public async Task<Question?> GetWithAnswersAsync(int id, CancellationToken token = default)
+        public async Task<Question?> GetWithAnswersAsync(int pollId, int questionId, CancellationToken token = default)
         {
             return await db.Questions
                 .Include(q => q.Answers)
-                .FirstOrDefaultAsync(q => q.Id == id, token);
+                .FirstOrDefaultAsync(q => (q.Id == questionId) && (q.PollId == pollId), token);
         }
 
 
@@ -22,5 +22,8 @@
         {
             return await db.Questions.AnyAsync(x => x.Content == content, token);
         }
+        public async Task<ICollection<Question>> GetAllAsync(int poolId, CancellationToken token = default) => await db.Questions.Where(q => q.PollId == poolId).Include(p => p.Answers).AsNoTracking().ToListAsync(token);
+
+
     }
 }

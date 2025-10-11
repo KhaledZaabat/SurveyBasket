@@ -24,7 +24,7 @@ public class PollService(IPollRepository pollRepository) : IPollService
     {
 
 
-        if (await pollRepository.ExistByTitle(request.Title, token))
+        if (await pollRepository.ExistByTitleAsync(request.Title, token))
             return Result.Failure<PollResponse>(PollError.Conflict());
 
         var poll = request.Adapt<Poll>();
@@ -35,13 +35,13 @@ public class PollService(IPollRepository pollRepository) : IPollService
 
     public async Task<Result> UpdateAsync(int id, UpdatePollRequest request, CancellationToken token = default)
     {
-        var poll = await pollRepository.GetByIdAsync(id, token);
+        Poll? poll = await pollRepository.GetByIdAsync(id, token);
         if (poll is null)
             return Result.Failure(PollError.NotFound());
 
 
 
-        if (await pollRepository.ExistByTitleWithDifferentId(request.Title, id, token))
+        if (await pollRepository.ExistByTitleWithDifferentIdAsync(request.Title, id, token))
             return Result.Failure(PollError.Conflict());
 
         // Apply updates
