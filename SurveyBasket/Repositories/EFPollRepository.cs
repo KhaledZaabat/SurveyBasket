@@ -53,11 +53,11 @@ public class EFPollRepository(AppDbContext db) : IPollRepository
     {
         Poll? existingPoll = await db.Polls.FindAsync(new object[] { id }, cancellationToken);
         if (existingPoll is null) return false;
+
+
         db.Polls.Remove(existingPoll);
         await db.SaveChangesAsync(cancellationToken);
-        //var rowsAffected = await db.Polls
-        //    .Where(p => p.Id == id)
-        //    .ExecuteDeleteAsync(token);
+
         return true;
     }
     public async Task<PublishStatus?> TogglePublish(int id, CancellationToken cancellationToken = default)
@@ -73,4 +73,5 @@ public class EFPollRepository(AppDbContext db) : IPollRepository
         return existingPoll.Status;
 
     }
+
 }

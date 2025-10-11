@@ -25,7 +25,7 @@ public class JwtProvider(IOptions<JwtSettings> jwtOptions) : IJwtProvider
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        // Add user roles as claims
+        // AddAsync user roles as claims
         //var roles = await _userManager.GetRolesAsync(user);
         //claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 

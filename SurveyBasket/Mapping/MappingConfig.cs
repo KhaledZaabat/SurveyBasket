@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using SurveyBasket.Contracts.Question.Requests;
 
 namespace SurveyBasket.Mapping;
 
@@ -22,6 +23,17 @@ public class MappingConfig : IRegister
             .Map(dest => dest.StartsAt, src => src.StartsAt)
             .Map(dest => dest.EndsAt, src => src.EndsAt)
             .TwoWays();
+
+        config.NewConfig<Question, QuestionResponse>()
+            .Map(des => des.Id, src => src.Id)
+            .Map(des => des.Content, src => src.Content)
+            .Map(des => des.AnswerResponses, src => src.Answers).TwoWays();
+
+
+        config.NewConfig<CreateQuestionRequest, Question>()
+              .Map(dest => dest.Answers,
+                src => src.Answers.Select(a => new Answer { Content = a }).ToList());
+
     }
 }
 

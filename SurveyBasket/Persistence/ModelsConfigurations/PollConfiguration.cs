@@ -1,6 +1,4 @@
-﻿namespace SurveyBasket.Persistence.ModelsConfigurations;
-
-public class PollConfiguration : IEntityTypeConfiguration<Poll>
+﻿public class PollConfiguration : IEntityTypeConfiguration<Poll>
 {
     public void Configure(EntityTypeBuilder<Poll> builder)
     {
@@ -15,22 +13,42 @@ public class PollConfiguration : IEntityTypeConfiguration<Poll>
             .WithMany()
             .HasForeignKey(p => p.CreatedById)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_Polls_Users_CreatedById");
+
         builder.HasOne(p => p.UpdatedBy)
-             .WithMany()
-             .HasForeignKey(p => p.UpdatedById)
-             .IsRequired(false)
-             .OnDelete(DeleteBehavior.SetNull);
+            .WithMany()
+            .HasForeignKey(p => p.UpdatedById)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_Polls_Users_UpdatedById");
+
+        builder.HasOne(p => p.DeletedBy)
+            .WithMany()
+            .HasForeignKey(p => p.DeletedById)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_Polls_Users_DeletedById");
 
         builder.OwnsOne(o => o.Status, st =>
         {
-
-            st.Property(s => s.IsPublished).HasColumnName("IsPublished").IsRequired();
+            st.Property(s => s.IsPublished)
+              .HasColumnName("IsPublished")
+              .IsRequired();
         });
 
-
-
+        builder.HasMany(p => p.Questions)
+            .WithOne(q => q.Poll)
+            .HasForeignKey(q => q.PollId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_Polls_Questions_PollId");
 
         builder.HasQueryFilter(b => b.IsDeleted == false);
+
+        builder.ToTable("Polls", tb =>
+        {
+            tb.HasTrigger("trg_Poll_CascadeSoftDelete");
+            tb.HasTrigger("trg_Poll_CascadeRestore");
+        });
     }
 }

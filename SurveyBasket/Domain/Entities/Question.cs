@@ -2,15 +2,16 @@
 
 namespace SurveyBasket.Domain.Entities;
 
-public class Poll : IAuditable, ISoftDeletable
+public class Question : IAuditable, ISoftDeletable
 {
-    public int Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string Summary { get; set; } = string.Empty;
-    public PublishStatus Status { get; set; } = default!;
 
-    public DateOnly StartsAt { get; set; }
-    public DateOnly EndsAt { get; set; }
+
+    public int Id { get; set; }
+    public string Content { get; set; } = string.Empty;
+    public int PollId { get; set; }
+    public Poll Poll { get; set; } = default!;
+    public ICollection<Answer> Answers { get; set; } = [];
+
 
     public string CreatedById { get; set; } = string.Empty;
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
@@ -20,13 +21,11 @@ public class Poll : IAuditable, ISoftDeletable
     public ApplicationUser CreatedBy { get; set; } = default!;
     public ApplicationUser? UpdatedBy { get; set; }
 
+
     public bool IsDeleted { get; set; }
     public string? DeletedById { get; set; }
     public DateTime? DeletedOn { get; set; }
     public ApplicationUser? DeletedBy { get; set; }
 
-    public ICollection<Question> Questions { get; set; }
-
 }
-
 
