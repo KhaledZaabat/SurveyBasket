@@ -26,10 +26,11 @@ public class PollConfiguration : IEntityTypeConfiguration<Poll>
         {
 
             st.Property(s => s.IsPublished).HasColumnName("IsPublished").IsRequired();
-        }
+        });
 
 
 
-            );
+
+        builder.HasQueryFilter(b => b.IsDeleted == false);
     }
 }

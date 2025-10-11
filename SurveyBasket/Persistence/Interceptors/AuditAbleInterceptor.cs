@@ -23,7 +23,7 @@ public class AuditAbleInterceptor(IHttpContextAccessor _accessor) : SaveChangesI
                 entityEntry.Property(x => x.CreatedOn).CurrentValue = DateTime.UtcNow;
 
             }
-            else if (entityEntry.State == EntityState.Modified)
+            else if (entityEntry.State == EntityState.Modified && entityEntry is ISoftDeletable softDeletable && !softDeletable.IsDeleted)
             {
 
 
@@ -34,7 +34,7 @@ public class AuditAbleInterceptor(IHttpContextAccessor _accessor) : SaveChangesI
             }
         }
 
-        return base.SavingChanges(eventData, result);
+        return result;
     }
 
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
@@ -65,7 +65,12 @@ public class AuditAbleInterceptor(IHttpContextAccessor _accessor) : SaveChangesI
 
             }
         }
-        return base.SavingChangesAsync(eventData, result, cancellationToken);
-    }
-}
 
+
+        return new ValueTask<InterceptionResult<int>>(result);
+    }
+
+
+
+
+}

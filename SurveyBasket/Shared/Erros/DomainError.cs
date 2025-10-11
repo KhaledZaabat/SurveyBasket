@@ -4,10 +4,10 @@ public sealed record DomainError(int StatusCode, string Code, string Description
     : Error(StatusCode, Code, Description)
 {
     public static DomainError NotFound(string entityName)
-        => new(404, $"Domain.{entityName}NotFound", $"{entityName} not found.");
+        => new(StatusCodes.Status404NotFound, $"Domain.{entityName}NotFound", $"{entityName} not found.");
 
     public static DomainError Conflict(string entityName)
-        => new(409, $"Domain.{entityName}Conflict", $"{entityName} already exists.");
+        => new(StatusCodes.Status409Conflict, $"Domain.{entityName}Conflict", $"{entityName} already exists.");
 }
 
 //public sealed record Error(int StatusCode, string Description)

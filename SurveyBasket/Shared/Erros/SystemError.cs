@@ -4,13 +4,13 @@ public sealed record SystemError(int StatusCode, string Code, string Description
     : Error(StatusCode, Code, Description)
 {
     public static SystemError Internal(string description = "Internal server error")
-        => new(500, "System.Internal", description);
+        => new(StatusCodes.Status500InternalServerError, "System.Internal", description);
 
     public static SystemError Database(string description = "Database operation failed")
-        => new(500, "System.Database", description);
+        => new(StatusCodes.Status500InternalServerError, "System.Database", description);
 
     public static SystemError ExternalService(string description = "External service error")
-        => new(502, "System.ExternalService", description);
+        => new(StatusCodes.Status502BadGateway, "System.ExternalService", description);
 }
 //public sealed record Error(int StatusCode, string Description)
 //{

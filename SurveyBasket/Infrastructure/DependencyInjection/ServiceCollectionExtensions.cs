@@ -43,13 +43,14 @@ public static class ServiceCollectionExtensions
     {
         services.AddHttpContextAccessor();
         services.AddSingleton<AuditAbleInterceptor>();
+        services.AddSingleton<SoftDeleteInterceptor>();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>((sp, options) =>
     options
         .UseSqlServer(connectionString)
 
-        .AddInterceptors(sp.GetRequiredService<AuditAbleInterceptor>())
+        .AddInterceptors(sp.GetRequiredService<AuditAbleInterceptor>(), sp.GetRequiredService<SoftDeleteInterceptor>())
 );
         return services;
     }
@@ -143,7 +144,7 @@ public static class ServiceCollectionExtensions
                 context.ProblemDetails.Instance =
                     $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
             };
-        });
+        }).AddProblemDetails();
         return services;
     }
 

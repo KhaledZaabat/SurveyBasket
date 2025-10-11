@@ -4,13 +4,13 @@ public sealed record ValidationError(int StatusCode, string Code, string Descrip
     : Error(StatusCode, Code, Description)
 {
     public static ValidationError InvalidInput(string description = "Validation error")
-        => new(422, "Validation.InvalidInput", description);
+        => new(StatusCodes.Status422UnprocessableEntity, "Validation.InvalidInput", description);
 
     public static ValidationError MissingField(string fieldName)
-        => new(422, "Validation.MissingField", $"The field '{fieldName}' is required.");
+        => new(StatusCodes.Status422UnprocessableEntity, "Validation.MissingField", $"The field '{fieldName}' is required.");
 
     public static ValidationError InvalidFormat(string fieldName, string description = "Invalid format")
-        => new(422, "Validation.InvalidFormat", $"Field '{fieldName}': {description}");
+        => new(StatusCodes.Status422UnprocessableEntity, "Validation.InvalidFormat", $"Field '{fieldName}': {description}");
 }
 
 //public sealed record Error(int StatusCode, string Description)

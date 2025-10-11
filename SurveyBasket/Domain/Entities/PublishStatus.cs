@@ -2,7 +2,7 @@
 
 
 [Owned]
-public record PublishStatus(bool IsPublished)
+public record PublishStatus(bool IsPublished = default)
 {
     public static PublishStatus Draft() => new(false);
     public static PublishStatus Published() => new(true);

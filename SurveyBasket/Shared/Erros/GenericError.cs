@@ -4,10 +4,10 @@ public sealed record GenericError(int StatusCode, string Code, string Descriptio
     : Error(StatusCode, Code, Description)
 {
     public static GenericError BadRequest(string description = "Bad request")
-        => new(400, "Generic.BadRequest", description);
+        => new(StatusCodes.Status400BadRequest, "Generic.BadRequest", description);
 
     public static GenericError Unknown(string description = "Unknown error")
-        => new(500, "Generic.Unknown", description);
+        => new(StatusCodes.Status500InternalServerError, "Generic.Unknown", description);
 }
 
 //public sealed record Error(int StatusCode, string Description)

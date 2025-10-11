@@ -33,13 +33,15 @@ public class PollService(IPollRepository pollRepository) : IPollService
     public async Task<Result> Update(int id, UpdatePollRequest request, CancellationToken token = default)
     {
         Poll poll = request.Adapt<Poll>();
-        bool Updated = await pollRepository.Update(id, poll, token);
-        if (!Updated)
-        {
-            return Result.Failure(PollError.NotFound());
-        }
+        UpdateResult result = await pollRepository.Update(id, poll, token);
 
-        return Result.Success();
+        return result switch
+        {
+            UpdateResult.Success => Result.Success(),
+            UpdateResult.NotFound => Result.Failure(PollError.NotFound()),
+            UpdateResult.Conflict => Result.Failure(PollError.Conflict()),
+            _ => Result.Failure(GenericError.Unknown())
+        };
     }
 
     public async Task<Result> Delete(int id, CancellationToken token = default)

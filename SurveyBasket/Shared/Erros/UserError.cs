@@ -4,19 +4,19 @@ public sealed record UserError(int StatusCode, string Code, string Description)
     : Error(StatusCode, Code, Description)
 {
     public static UserError InvalidToken(string description = "Invalid or expired token")
-        => new(401, "User.InvalidToken", description);
+        => new(StatusCodes.Status401Unauthorized, "User.InvalidToken", description);
 
     public static UserError InvalidCredentials(string description = "Invalid email or password")
-        => new(401, "User.InvalidCredentials", description);
+        => new(StatusCodes.Status401Unauthorized, "User.InvalidCredentials", description);
 
     public static UserError Unauthorized(string description = "Unauthorized")
-        => new(401, "User.Unauthorized", description);
+        => new(StatusCodes.Status401Unauthorized, "User.Unauthorized", description);
 
     public static UserError Forbidden(string description = "Forbidden")
-        => new(403, "User.Forbidden", description);
+        => new(StatusCodes.Status403Forbidden, "User.Forbidden", description);
 
     public static UserError Conflict(string description = "Conflict")
-        => new(409, "User.Conflict", description);
+        => new(StatusCodes.Status409Conflict, "User.Conflict", description);
 
 }
 

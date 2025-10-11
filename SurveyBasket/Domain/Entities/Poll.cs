@@ -2,7 +2,7 @@
 
 namespace SurveyBasket.Domain.Entities;
 
-public class Poll : IAuditable
+public class Poll : IAuditable, ISoftDeletable
 {
     public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
@@ -23,7 +23,10 @@ public class Poll : IAuditable
         get; set;
 
     }
-
+    public bool IsDeleted { get; set; }
+    public string? DeletedById { get; set; }
+    public DateTime? DeletedOn { get; set; }
+    public ApplicationUser? DeletedBy { get; set; }
 }
 
 

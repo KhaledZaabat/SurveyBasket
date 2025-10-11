@@ -9,6 +9,7 @@ global using SurveyBasket.Contracts.Authentication.Responses;
 global using SurveyBasket.Contracts.Authentication.Settings;
 global using SurveyBasket.Contracts.Polls.Requests;
 global using SurveyBasket.Domain.Entities;
+global using SurveyBasket.Enums;
 global using SurveyBasket.Infrastructure.DependencyInjection;
 global using SurveyBasket.Persistence.Data;
 global using SurveyBasket.Repositories;
