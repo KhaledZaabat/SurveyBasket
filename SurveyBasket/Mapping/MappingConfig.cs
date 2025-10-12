@@ -49,6 +49,10 @@ public class MappingConfig : IRegister
         config.NewConfig<CreateQuestionRequest, Question>()
               .Map(dest => dest.Answers,
                 src => src.Answers.Select(a => new Answer { Content = a }).ToList());
+        config.NewConfig<UpdateQuestionRequest, Question>()
+              .Map(dest => dest.Answers,
+                src => src.Answers.Select(a => new Answer { Content = a }).ToList());
+
 
     }
 }

@@ -11,6 +11,13 @@ public class AuditAbleInterceptor(IHttpContextAccessor _accessor) : SaveChangesI
         if (eventData.Context is null)
             return result;
 
+
+        if (eventData.Context is not AppDbContext context)
+            return result;
+
+        if (context.DisableAuditing)
+            return result;
+
         var entries = eventData.Context.ChangeTracker.Entries<IAuditable>();
         var currentUserId = _accessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
         foreach (var entityEntry in entries)
@@ -42,6 +49,14 @@ public class AuditAbleInterceptor(IHttpContextAccessor _accessor) : SaveChangesI
 
         if (eventData.Context is null)
             return new ValueTask<InterceptionResult<int>>(result);
+
+
+        if (eventData.Context is not AppDbContext context)
+            return new ValueTask<InterceptionResult<int>>(result);
+
+        if (context.DisableAuditing)
+            return new ValueTask<InterceptionResult<int>>(result); // 🚫 skip interceptor
+
 
         var entries = eventData.Context.ChangeTracker.Entries<IAuditable>();
         var currentUserId = _accessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);

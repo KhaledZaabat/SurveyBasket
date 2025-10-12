@@ -10,7 +10,7 @@ public class Question : IAuditable, ISoftDeletable
     public string Content { get; set; } = string.Empty;
     public int PollId { get; set; }
     public Poll Poll { get; set; } = default!;
-    public ICollection<Answer> Answers { get; set; } = [];
+    public ICollection<Answer>? Answers { get; set; } = [];
 
 
     public string CreatedById { get; set; } = string.Empty;

@@ -9,5 +9,6 @@ public interface IQuestionService : IScopedService
     public Task<Result<QuestionResponse>> GetByIdAsync(int pollId, int questionId, CancellationToken token = default);
     public Task<Result> RestoreQuestion(int pollId, int questionId, CancellationToken token = default);
     public Task<Result> DeleteQuestionAsync(int pollId, int questionId, CancellationToken token = default);
+    public Task<Result> UpdateQuestionAsync(int pollId, int questionId, UpdateQuestionRequest updateRequest, CancellationToken token = default);
 }
 

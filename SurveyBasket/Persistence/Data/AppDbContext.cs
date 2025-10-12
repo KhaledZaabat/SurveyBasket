@@ -6,10 +6,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         : base(options)
     {
     }
-
+    public bool DisableAuditing { get; set; } = false;
+    public bool DisableSoftDeletion { get; set; } = false;
     public DbSet<Answer> Answers { get; set; }
     public DbSet<Poll> Polls { get; set; }
     public DbSet<Question> Questions { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

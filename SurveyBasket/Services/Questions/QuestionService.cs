@@ -77,5 +77,23 @@ public class QuestionService(IQuestionRepository questionsRepo, IPollRepository 
 
         return Result.Success();
     }
+    public async Task<Result> UpdateQuestionAsync(int pollId, int questionId, UpdateQuestionRequest updateRequest, CancellationToken token = default)
+    {
+        if (!await poolReop.ExistByIdAsync(pollId, token))
+            return Result.Failure(QuestionError.PoolNotFound());
+
+        if (!await questionsRepo.ExistByIdAsync(pollId, questionId, token))
+            return Result.Failure(QuestionError.QuestionNotFound());
+
+        if (await questionsRepo.ExistByContentWithDifferentId(pollId, questionId, updateRequest.Content, token))
+            return Result.Failure(QuestionError.ConflictQuestion());
+
+        Question question = updateRequest.Adapt<Question>();
+        bool updated = await questionsRepo.UpdateAsync(pollId, questionId, question, token);
+        if (!updated)
+            return Result.Failure(SystemError.Database());
+
+        return Result.Success();
+    }
 }
 

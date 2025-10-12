@@ -13,6 +13,12 @@ public class SoftDeleteInterceptor(IHttpContextAccessor _accessor) : SaveChanges
         if (eventData.Context is null)
             return result;
 
+        if (eventData.Context is not AppDbContext context)
+            return result;
+
+        if (context.DisableSoftDeletion)
+            return result;
+
         ApplySoftDelete(eventData);
         return result;
     }
@@ -22,9 +28,16 @@ public class SoftDeleteInterceptor(IHttpContextAccessor _accessor) : SaveChanges
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
+
         if (eventData.Context is null)
             return new ValueTask<InterceptionResult<int>>(result);
 
+
+        if (eventData.Context is not AppDbContext context)
+            return new ValueTask<InterceptionResult<int>>(result);
+
+        if (context.DisableSoftDeletion)
+            return new ValueTask<InterceptionResult<int>>(result); // 🚫 skip interceptor
         ApplySoftDelete(eventData);
         return new ValueTask<InterceptionResult<int>>(result);
     }

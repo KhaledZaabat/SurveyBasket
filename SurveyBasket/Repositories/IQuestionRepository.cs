@@ -11,5 +11,8 @@ public interface IQuestionRepository : IScopedService
     public Task<bool> ExistByIdAsyncIgnoredFilter(int pollId, int questionId, CancellationToken token = default);
 
     public Task<bool> DeleteQuestionAsync(int pollId, int questionId, CancellationToken token = default);
+
+    public Task<bool> UpdateAsync(int pollId, int questionId, Question updatedQuestion, CancellationToken token = default);
+    public Task<bool> ExistByContentWithDifferentId(int pollId, int questionId, string content, CancellationToken token = default);
 }
 
