@@ -37,5 +37,27 @@ namespace SurveyBasket.Controllers
 
 
         }
+        [HttpPatch("{questionId}/restore")]
+        public async Task<IActionResult> RestoreQuestion([FromRoute] int pollId,
+            [FromRoute] int questionId,
+            CancellationToken token = default)
+        {
+            Result result = await questionService.RestoreQuestion(pollId, questionId, token);
+            if (result is SuccessResult) return NoContent();
+            return result.ToProblem();
+
+        }
+        [HttpDelete("{questionId}")]
+        public async Task<IActionResult> DeleteQuestion([FromRoute] int pollId,
+    [FromRoute] int questionId,
+    CancellationToken token = default)
+        {
+            var result = await questionService.DeleteQuestionAsync(pollId, questionId, token);
+            if (result is SuccessResult)
+                return NoContent();
+
+            return result.ToProblem();
+        }
+
     }
 }

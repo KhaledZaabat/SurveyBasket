@@ -19,9 +19,9 @@ public class QuestionService(IQuestionRepository questionsRepo, IPollRepository 
 
         var created = await questionsRepo.AddAsync(question, token);
         if (created is null)
-            return Result.Failure<QuestionResponse>(QuestionError.CreationFailed());
+            return Result.Failure<QuestionResponse>(SystemError.Database());
 
-        var fullQuestion = await questionsRepo.GetWithAnswersAsync(created.Id, token);
+        var fullQuestion = await questionsRepo.GetWithAnswersAsync(pollId, created.Id, token);
 
         return Result.Success<QuestionResponse>(fullQuestion.Adapt<QuestionResponse>());
 
@@ -30,21 +30,52 @@ public class QuestionService(IQuestionRepository questionsRepo, IPollRepository 
     {
         if (!(await poolReop.ExistByIdAsync(pollId, token)))
             return Result.Failure<ICollection<QuestionResponse>>(QuestionError.PoolNotFound());
-        ICollection<Question> questions = await questionsRepo.GetAllAsync(pollId, token);
+        ICollection<Question>? questions = await questionsRepo.GetAllAsync(pollId, token);
+        if (questions is null)
+            return Result.Failure<ICollection<QuestionResponse>>(SystemError.Database());
         return Result.Success<ICollection<QuestionResponse>>(questions.Adapt<ICollection<QuestionResponse>>());
     }
     public async Task<Result<QuestionResponse>> GetByIdAsync(int pollId, int questionId, CancellationToken token = default)
     {
         if (!await poolReop.ExistByIdAsync(pollId, token))
             return Result.Failure<QuestionResponse>(QuestionError.PoolNotFound());
-        Question? question = await questionsRepo.GetWithAnswersAsync(pollId: pollId, questionId: questionId, token);
-        if (question is null)
+        if (!await questionsRepo.ExistByIdAsync(pollId, questionId, token))
             return Result.Failure<QuestionResponse>(QuestionError.QuestionNotFound());
 
+        Question? question = await questionsRepo.GetWithAnswersAsync(pollId: pollId, questionId: questionId, token);
+        if (question is null)
+            return Result.Failure<QuestionResponse>(SystemError.Database());
         return Result.Success<QuestionResponse>(question.Adapt<QuestionResponse>());
 
 
     }
+    public async Task<Result> RestoreQuestion(int pollId, int questionId, CancellationToken token = default)
+    {
 
+        if (!await poolReop.ExistByIdAsync(pollId, token))
+            return Result.Failure(QuestionError.PoolNotFound());
+        if (!await questionsRepo.ExistByIdAsyncIgnoredFilter(pollId, questionId, token))
+            return Result.Failure(QuestionError.QuestionNotFound());
+
+        bool Restored = await questionsRepo.RestoreQuestion(pollId: pollId, questionId: questionId, token);
+        if (!Restored)
+            return Result.Failure(SystemError.Database());
+
+        return Result.Success();
+    }
+    public async Task<Result> DeleteQuestionAsync(int pollId, int questionId, CancellationToken token = default)
+    {
+        if (!await poolReop.ExistByIdAsync(pollId, token))
+            return Result.Failure(QuestionError.PoolNotFound());
+
+        if (!await questionsRepo.ExistByIdAsync(pollId, questionId, token))
+            return Result.Failure(QuestionError.QuestionNotFound());
+
+        bool deleted = await questionsRepo.DeleteQuestionAsync(pollId, questionId, token);
+        if (!deleted)
+            return Result.Failure(SystemError.Database());
+
+        return Result.Success();
+    }
 }
 

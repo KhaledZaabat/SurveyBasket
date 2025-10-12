@@ -15,6 +15,6 @@ public sealed record QuestionError(int StatusCode, string Code, string Descripti
     public static QuestionError ConflictQuestion(string description = "A question with this content already exists")
         => new(StatusCodes.Status409Conflict, "Question.Conflict", description);
 
-    public static QuestionError CreationFailed(string description = "Failed to create the question")
-        => new(StatusCodes.Status500InternalServerError, "Question.CreationFailed", description);
+    //public static QuestionError CreationFailed(string description = "Failed to create the question")
+    //    => new(StatusCodes.Status500InternalServerError, "Question.CreationFailed", description);
 }
