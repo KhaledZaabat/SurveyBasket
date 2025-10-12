@@ -5,12 +5,17 @@ namespace SurveyBasket.Services.SurveyServices;
 
 public class SurveyService(ISurveyRepository surveyRepository) : ISurveyService
 {
-    public async Task<Result<List<SurveyResponse>>> GetAllAsync(CancellationToken token = default)
+    public async Task<Result<ICollection<SurveyResponse>>> GetAllAsync(CancellationToken token = default)
     {
         var surveys = await surveyRepository.GetAllAsync(token);
-        return Result.Success(surveys.Adapt<List<SurveyResponse>>());
+        return Result.Success(surveys.Adapt<ICollection<SurveyResponse>>());
     }
 
+    public async Task<Result<ICollection<SurveyResponse>>> GetAllIncludingDeletedAsync(CancellationToken token = default)
+    {
+        var surveys = await surveyRepository.GetAllIncludingDeletedAsync(token);
+        return Result.Success(surveys.Adapt<ICollection<SurveyResponse>>());
+    }
     public async Task<Result<SurveyResponse>> GetByIdAsync(int id, CancellationToken token = default)
     {
         var survey = await surveyRepository.GetByIdAsync(id, token);

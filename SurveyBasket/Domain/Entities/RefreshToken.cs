@@ -13,4 +13,3 @@ public class RefreshToken
     bool IsExpired => DateTime.UtcNow >= ExpiresAt;
     public bool IsActive => !IsExpired && RevokedOn is null;
 }
-

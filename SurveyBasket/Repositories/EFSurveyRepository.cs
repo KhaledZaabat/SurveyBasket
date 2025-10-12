@@ -12,8 +12,10 @@ public class EFSurveyRepository(AppDbContext db) : ISurveyRepository
     public Task<int> CountAsync(CancellationToken cancellationToken = default)
         => db.Surveys.CountAsync(cancellationToken);
 
-    public Task<List<Survey>> GetAllAsync(CancellationToken cancellationToken = default)
-        => db.Surveys.AsNoTracking().ToListAsync(cancellationToken);
+    public async Task<ICollection<Survey>> GetAllAsync(CancellationToken cancellationToken = default)
+        => await db.Surveys.AsNoTracking().ToListAsync(cancellationToken);
+    public async Task<ICollection<Survey>> GetAllIncludingDeletedAsync(CancellationToken cancellationToken = default) =>
+         await db.Surveys.IgnoreQueryFilters().AsNoTracking().ToListAsync(cancellationToken);
 
     public Task<Survey?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         => db.Surveys.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, cancellationToken);

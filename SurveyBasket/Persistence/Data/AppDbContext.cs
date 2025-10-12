@@ -12,6 +12,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Survey> Surveys { get; set; }
     public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
 
+    public DbSet<UserSubmission> UserSubmissions { get; set; }
+    public DbSet<SubmissionDetail> SubmissionDetails { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

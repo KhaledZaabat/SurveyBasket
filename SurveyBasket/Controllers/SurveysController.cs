@@ -9,8 +9,14 @@ namespace SurveyBasket.Controllers;
 public class SurveysController(ISurveyService _surveyService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<SurveyResponse>>> GetAll(CancellationToken token = default)
+    public async Task<ActionResult<ICollection<SurveyResponse>>> GetAll(CancellationToken token = default)
         => (await _surveyService.GetAllAsync(token)).ToActionResult(context: HttpContext);
+
+    [HttpGet("admin/all")]
+    // [Authorize(Roles = "Admin")] later
+    public async Task<ActionResult<ICollection<SurveyResponse>>> GetAllIncludingDeleted(CancellationToken token = default)
+         => (await _surveyService.GetAllIncludingDeletedAsync(token))
+             .ToActionResult(context: HttpContext);
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<SurveyResponse>> GetById([FromRoute] int id, CancellationToken token = default)
