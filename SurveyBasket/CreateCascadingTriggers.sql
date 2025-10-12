@@ -1,8 +1,8 @@
 ﻿---------------------------------------------------------
--- 1. Cascade Soft Delete: Poll → Questions
+-- 1. Cascade Soft Delete: Survey → SurveyQuestions
 ---------------------------------------------------------
-CREATE OR ALTER TRIGGER trg_Poll_CascadeSoftDelete
-ON Polls
+CREATE OR ALTER TRIGGER trg_Survey_CascadeSoftDelete
+ON Surveys
 AFTER UPDATE
 AS
 BEGIN
@@ -12,7 +12,7 @@ BEGIN
     IF NOT UPDATE(IsDeleted)
         RETURN;
 
-    -- Skip if no Poll actually transitioned from not-deleted → deleted
+    -- Skip if no Survey actually transitioned from not-deleted → deleted
     IF NOT EXISTS (
         SELECT 1
         FROM inserted i
@@ -29,8 +29,8 @@ BEGIN
             q.IsDeleted = 1,
             q.DeletedOn = GETUTCDATE(),
             q.DeletedById = i.DeletedById
-        FROM Questions q
-        INNER JOIN inserted i ON q.PollId = i.Id
+        FROM SurveyQuestions q
+        INNER JOIN inserted i ON q.SurveyId = i.Id
         INNER JOIN deleted d ON i.Id = d.Id
         WHERE 
             i.IsDeleted = 1
@@ -47,10 +47,10 @@ END
 GO
 
 ---------------------------------------------------------
--- 2. Cascade Soft Delete: Question → Answers
+-- 2. Cascade Soft Delete: SurveyQuestion → SurveyOptions
 ---------------------------------------------------------
-CREATE OR ALTER TRIGGER trg_Question_CascadeSoftDelete
-ON Questions
+CREATE OR ALTER TRIGGER trg_SurveyQuestion_CascadeSoftDelete
+ON SurveyQuestions
 AFTER UPDATE
 AS
 BEGIN
@@ -76,8 +76,8 @@ BEGIN
             a.IsDeleted = 1,
             a.DeletedOn = GETUTCDATE(),
             a.DeletedById = i.DeletedById
-        FROM Answers a
-        INNER JOIN inserted i ON a.QuestionId = i.Id
+        FROM SurveyOptions a
+        INNER JOIN inserted i ON a.SurveyQuestionId = i.Id
         INNER JOIN deleted d ON i.Id = d.Id
         WHERE 
             i.IsDeleted = 1
@@ -94,10 +94,10 @@ END
 GO
 
 ---------------------------------------------------------
--- 3. Cascade Restore: Poll → Questions
+-- 3. Cascade Restore: Survey → SurveyQuestions
 ---------------------------------------------------------
-CREATE OR ALTER TRIGGER trg_Poll_CascadeRestore
-ON Polls
+CREATE OR ALTER TRIGGER trg_Survey_CascadeRestore
+ON Surveys
 AFTER UPDATE
 AS
 BEGIN
@@ -107,7 +107,7 @@ BEGIN
     IF NOT UPDATE(IsDeleted)
         RETURN;
 
-    -- Skip if no Poll actually transitioned from deleted → restored
+    -- Skip if no Survey actually transitioned from deleted → restored
     IF NOT EXISTS (
         SELECT 1
         FROM inserted i
@@ -124,8 +124,8 @@ BEGIN
             q.IsDeleted = 0,
             q.DeletedOn = NULL,
             q.DeletedById = NULL
-        FROM Questions q
-        INNER JOIN inserted i ON q.PollId = i.Id
+        FROM SurveyQuestions q
+        INNER JOIN inserted i ON q.SurveyId = i.Id
         INNER JOIN deleted d ON i.Id = d.Id
         WHERE 
             i.IsDeleted = 0
@@ -142,10 +142,10 @@ END
 GO
 
 ---------------------------------------------------------
--- 4. Cascade Restore: Question → Answers
+-- 4. Cascade Restore: SurveyQuestion → SurveyOptions
 ---------------------------------------------------------
-CREATE OR ALTER TRIGGER trg_Question_CascadeRestore
-ON Questions
+CREATE OR ALTER TRIGGER trg_SurveyQuestion_CascadeRestore
+ON SurveyQuestions
 AFTER UPDATE
 AS
 BEGIN
@@ -171,8 +171,8 @@ BEGIN
             a.IsDeleted = 0,
             a.DeletedOn = NULL,
             a.DeletedById = NULL
-        FROM Answers a
-        INNER JOIN inserted i ON a.QuestionId = i.Id
+        FROM SurveyOptions a
+        INNER JOIN inserted i ON a.SurveyQuestionId = i.Id
         INNER JOIN deleted d ON i.Id = d.Id
         WHERE 
             i.IsDeleted = 0
@@ -198,10 +198,10 @@ SELECT
     t.is_disabled AS IsDisabled
 FROM sys.triggers t
 WHERE t.name IN (
-    'trg_Poll_CascadeSoftDelete',
-    'trg_Question_CascadeSoftDelete',
-    'trg_Poll_CascadeRestore',
-    'trg_Question_CascadeRestore'
+    'trg_Survey_CascadeSoftDelete',
+    'trg_SurveyQuestion_CascadeSoftDelete',
+    'trg_Survey_CascadeRestore',
+    'trg_SurveyQuestion_CascadeRestore'
 )
 ORDER BY OBJECT_NAME(t.parent_id), t.name;
 GO

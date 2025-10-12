@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
     // ------------------ VALIDATION ------------------
     private static IServiceCollection AddValidationConfiguration(this IServiceCollection services)
     {
-        services.AddValidatorsFromAssemblyContaining<CreatePollRequest>();
+        services.AddValidatorsFromAssemblyContaining<CreateSurveyRequest>();
         services.AddFluentValidationAutoValidation();
         return services;
     }

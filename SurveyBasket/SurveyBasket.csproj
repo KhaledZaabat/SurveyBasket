@@ -30,8 +30,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Contracts\Answers\Validations\" />
-	  <Folder Include="Contracts\Answers\Requests\" />
+	  <Folder Include="Contracts\SurveyOptions\Validations\" />
+	  <Folder Include="Contracts\SurveyOptions\Requests\" />
 	  <Folder Include="Enums\" />
 	</ItemGroup>
 
