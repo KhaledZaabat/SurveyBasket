@@ -11,5 +11,6 @@ public interface ISurveyService : IScopedService
     Task<Result> UpdateAsync(int id, UpdateSurveyRequest request, CancellationToken token = default);
     Task<Result> DeleteAsync(int id, CancellationToken token = default);
     Task<Result> TogglePublishAsync(int id, CancellationToken cancellationToken = default);
+    Task<Result<ICollection<SurveyResponse>>> GetCurrentSurveysAsync(CancellationToken token = default);
 
 }

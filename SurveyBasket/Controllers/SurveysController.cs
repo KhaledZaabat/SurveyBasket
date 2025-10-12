@@ -61,7 +61,9 @@ public class SurveysController(ISurveyService _surveyService) : ControllerBase
         return result.ToActionResult(context: HttpContext);
     }
 
-
-
+    [HttpGet("current")]
+    public async Task<ActionResult<ICollection<SurveyResponse>>> GetCurrentSurveys(CancellationToken token = default)
+    => (await _surveyService.GetCurrentSurveysAsync(token))
+        .ToActionResult(context: HttpContext);
 
 }

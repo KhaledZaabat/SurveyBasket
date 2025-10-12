@@ -80,4 +80,13 @@ public class SurveyService(ISurveyRepository surveyRepository) : ISurveyService
 
         return Result.Success();
     }
+    public async Task<Result<ICollection<SurveyResponse>>> GetCurrentSurveysAsync(CancellationToken token = default)
+    {
+        var surveys = await surveyRepository.GetCurrentSurveysAsync(token);
+
+        if (surveys == null)
+            return Result.Failure<ICollection<SurveyResponse>>(SystemError.Database());
+
+        return Result.Success(surveys.Adapt<ICollection<SurveyResponse>>());
+    }
 }

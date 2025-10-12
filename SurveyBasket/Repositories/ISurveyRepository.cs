@@ -13,5 +13,6 @@ public interface ISurveyRepository : IScopedService
     public Task<bool> ExistByIdAsync(int id, CancellationToken cancellationToken = default);
     public Task<bool> ExistByTitleAsync(string title, CancellationToken cancellationToken = default);
     public Task<bool> ExistByTitleWithDifferentIdAsync(string title, int id, CancellationToken cancellationToken = default);
+    public Task<ICollection<Survey>> GetCurrentSurveysAsync(CancellationToken cancellationToken = default);
 
 }

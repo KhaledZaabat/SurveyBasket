@@ -38,5 +38,10 @@ public class EFSurveyRepository(AppDbContext db) : ISurveyRepository
     public async Task<bool> ExistByTitleWithDifferentIdAsync(string title, int id, CancellationToken cancellationToken = default)
      => await db.Surveys.AnyAsync(e => e.Title == title && id != e.Id, cancellationToken);
 
+    public async Task<ICollection<Survey>> GetCurrentSurveysAsync(CancellationToken cancellationToken = default)
+        => await db.Surveys
+        .AsNoTracking()
+        .Where(s => DateOnly.FromDateTime(DateTime.UtcNow) >= s.StartsAt
+        && DateOnly.FromDateTime(DateTime.UtcNow) <= s.EndsAt && s.Status.IsPublished).ToListAsync(cancellationToken);
 
 }
