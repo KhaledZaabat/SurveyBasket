@@ -8,3 +8,16 @@ POST {{SurveyBasket_HostAddress}}/Auth/register
   "lastName": "Doe"
   
 }
+
+PUT {{SurveyBasket_HostAddress}}/api/surveys/6
+Content-Type: application/json
+
+{
+   "title": "Quick Feedback",
+  "summary": "Tell us what you think about our new feature",
+  "isPublished": true,
+  "startsAt": "2025-10-11",
+  "endsAt": "2025-10-15"
+}
+
+###

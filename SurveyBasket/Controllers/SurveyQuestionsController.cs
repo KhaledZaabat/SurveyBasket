@@ -4,7 +4,7 @@ using SurveyBasket.Services.SurveyQuestions;
 
 namespace SurveyBasket.Controllers;
 
-[Route("api/surveys/{surveyId}/[controller]")]
+[Route("api/surveys/{surveyId}/Questions")]
 [ApiController]
 [Authorize]
 public class SurveyQuestionsController(ISurveyQuestionService questionService) : ControllerBase
@@ -38,6 +38,8 @@ public class SurveyQuestionsController(ISurveyQuestionService questionService) :
 
 
     }
+
+
     [HttpPatch("{questionId}/restore")]
     public async Task<IActionResult> RestoreSurveyQuestion([FromRoute] int surveyId,
         [FromRoute] int questionId,
@@ -49,6 +51,7 @@ public class SurveyQuestionsController(ISurveyQuestionService questionService) :
 
     }
     [HttpDelete("{questionId}")]
+
     public async Task<IActionResult> DeleteSurveyQuestion([FromRoute] int surveyId,
 [FromRoute] int questionId,
 CancellationToken token = default)
@@ -60,15 +63,7 @@ CancellationToken token = default)
         return result.ToProblem(HttpContext);
     }
 
-    [HttpPut("{questionId}")]
-    public async Task<IActionResult> UpdateSurveyQuestion([FromRoute] int surveyId,
-        [FromRoute] int questionId, UpdateSurveyQuestionRequest updateRequest,
-        CancellationToken token = default)
-    {
-        Result result = await questionService.UpdateSurveyQuestionAsync(surveyId, questionId, updateRequest, token);
-        if (result is SuccessResult) return NoContent();
-        return result.ToProblem(HttpContext);
-    }
+
 }
 
 

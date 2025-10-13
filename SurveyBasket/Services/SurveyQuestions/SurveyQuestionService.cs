@@ -3,11 +3,11 @@ using SurveyBasket.Shared.Errors;
 
 namespace SurveyBasket.Services.SurveyQuestions;
 
-public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISurveyRepository poolReop) : ISurveyQuestionService
+public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISurveyRepository surveyReop, IUserSubmissionsRepository submissionRepo) : ISurveyQuestionService
 {
     public async Task<Result<SurveyQuestionResponse>> AddAsync(int surveyId, CreateSurveyQuestionRequest request, CancellationToken token = default)
     {
-        if (!await poolReop.ExistByIdAsync(surveyId, token))
+        if (!await surveyReop.ExistByIdAsync(surveyId, token))
             return Result.Failure<SurveyQuestionResponse>(SurveyQuestionError.SurveyNotFound());
 
         if (await questionsRepo.IsDuplicateSurveyQuestionAsync(request.Content, token))
@@ -27,7 +27,7 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
     }
     public async Task<Result<ICollection<SurveyQuestionResponse>>> GetAllAsync(int surveyId, CancellationToken token = default)
     {
-        if (!(await poolReop.ExistByIdAsync(surveyId, token)))
+        if (!(await surveyReop.ExistByIdAsync(surveyId, token)))
             return Result.Failure<ICollection<SurveyQuestionResponse>>(SurveyQuestionError.SurveyNotFound());
         ICollection<SurveyQuestion>? questions = await questionsRepo.GetAllAsync(surveyId, token);
         if (questions is null)
@@ -36,7 +36,7 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
     }
     public async Task<Result<SurveyQuestionResponse>> GetByIdAsync(int surveyId, int questionId, CancellationToken token = default)
     {
-        if (!await poolReop.ExistByIdAsync(surveyId, token))
+        if (!await surveyReop.ExistByIdAsync(surveyId, token))
             return Result.Failure<SurveyQuestionResponse>(SurveyQuestionError.SurveyNotFound());
         if (!await questionsRepo.ExistByIdAsync(surveyId, questionId, token))
             return Result.Failure<SurveyQuestionResponse>(SurveyQuestionError.SurveyQuestionNotFound());
@@ -51,7 +51,7 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
     public async Task<Result> RestoreSurveyQuestion(int surveyId, int questionId, CancellationToken token = default)
     {
 
-        if (!await poolReop.ExistByIdAsync(surveyId, token))
+        if (!await surveyReop.ExistByIdAsync(surveyId, token))
             return Result.Failure(SurveyQuestionError.SurveyNotFound());
         if (!await questionsRepo.ExistByIdAsyncIgnoredFilter(surveyId, questionId, token))
             return Result.Failure(SurveyQuestionError.SurveyQuestionNotFound());
@@ -64,7 +64,7 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
     }
     public async Task<Result> DeleteSurveyQuestionAsync(int surveyId, int questionId, CancellationToken token = default)
     {
-        if (!await poolReop.ExistByIdAsync(surveyId, token))
+        if (!await surveyReop.ExistByIdAsync(surveyId, token))
             return Result.Failure(SurveyQuestionError.SurveyNotFound());
 
         if (!await questionsRepo.ExistByIdAsync(surveyId, questionId, token))
@@ -78,7 +78,7 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
     }
     public async Task<Result> UpdateSurveyQuestionAsync(int surveyId, int questionId, UpdateSurveyQuestionRequest updateRequest, CancellationToken token = default)
     {
-        if (!await poolReop.ExistByIdAsync(surveyId, token))
+        if (!await surveyReop.ExistByIdAsync(surveyId, token))
             return Result.Failure(SurveyQuestionError.SurveyNotFound());
 
         if (!await questionsRepo.ExistByIdAsync(surveyId, questionId, token))
@@ -94,5 +94,34 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
 
         return Result.Success();
     }
+
+    public async Task<Result<ICollection<SurveyQuestionResponse>>> GetAvailableQuestionAsync(
+    int surveyId, string userId, CancellationToken token)
+    {
+        if (await submissionRepo.SubmittedBeforeAsync(userId, token))
+            return Result.Failure<ICollection<SurveyQuestionResponse>>(UserSubmissionError.DuplicateSubmission());
+
+        if (!await surveyReop.ExistByIdAsync(surveyId, token))
+            return Result.Failure<ICollection<SurveyQuestionResponse>>(SurveyError.NotFound());
+
+
+        if (await surveyReop.IsSurveyNotStarted(surveyId, token))
+            return Result.Failure<ICollection<SurveyQuestionResponse>>(SurveyError.NotOpened("The survey has not started yet."));
+
+
+        if (await surveyReop.IsSurveyClosed(surveyId, token))
+            return Result.Failure<ICollection<SurveyQuestionResponse>>(SurveyError.AlreadyClosed());
+
+
+        if (!await surveyReop.IsSurveyAvailable(surveyId, token))
+            return Result.Failure<ICollection<SurveyQuestionResponse>>(SurveyError.NotOpened("The survey is not available or not published."));
+
+
+        var questions = await questionsRepo.GetAvailableQuestionAsync(surveyId, token);
+        var response = questions.Adapt<ICollection<SurveyQuestionResponse>>();
+
+        return Result.Success(response);
+    }
+
 }
 

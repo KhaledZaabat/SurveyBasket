@@ -1,7 +1,5 @@
 ﻿using Mapster;
-using SurveyBasket.Contracts.Polls.Requests;
 using SurveyBasket.Contracts.SurveyOptions.Responses;
-using SurveyBasket.Contracts.SurveyQuestion.Responses;
 
 namespace SurveyBasket.Mapping;
 
@@ -16,6 +14,10 @@ public class MappingConfig : IRegister
             .Map(dest => dest.StartsAt, src => src.StartsAt)
             .Map(dest => dest.EndsAt, src => src.EndsAt)
             .TwoWays();
+
+        config.NewConfig<Survey, SurveyResponse>()
+            .Map(des => des.IsPublished, src => src.Status.IsPublished);
+
 
 
         config.NewConfig<UpdateSurveyRequest, Survey>()

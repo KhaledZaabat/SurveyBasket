@@ -94,5 +94,17 @@ public class SurveyQuestionRepository(AppDbContext db) : ISurveyQuestionReposito
     public async Task<bool> ExistByContentWithDifferentId(int surveyId, int questionId, string content, CancellationToken token = default)
         => await db.SurveyQuestions.AnyAsync(q => q.SurveyId == surveyId && q.Id != questionId && q.Content == content);
 
+    public async Task<ICollection<SurveyQuestion>> GetAvailableQuestionAsync(int surveyId, CancellationToken cancellationToken = default)
+
+    {
+        return await db.SurveyQuestions
+               .Include(q => q.SurveyOptions)
+               .AsNoTracking()
+               .Where(q => q.SurveyId == surveyId)
+               .ToListAsync(cancellationToken);
+    }
+
+
+
 }
 

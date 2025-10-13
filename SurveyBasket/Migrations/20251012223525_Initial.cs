@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SurveyBasket.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -264,6 +264,40 @@ namespace SurveyBasket.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserSubmissions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SurveyId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SubmittedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    DeletedOn = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSubmissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserSubmissions_AspNetUsers_DeletedById",
+                        column: x => x.DeletedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_UserSubmissions_Surveys_SurveyId",
+                        column: x => x.SurveyId,
+                        principalTable: "Surveys",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_UserSubmissions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SurveyOptions",
                 columns: table => new
                 {
@@ -303,6 +337,40 @@ namespace SurveyBasket.Migrations
                         column: x => x.SurveyQuestionId,
                         principalTable: "SurveyQuestions",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SubmissionDetails",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserSubmissionId = table.Column<int>(type: "int", nullable: false),
+                    QuestionId = table.Column<int>(type: "int", nullable: false),
+                    OptionId = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    DeletedOn = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubmissionDetails", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubmissionDetails_AspNetUsers_DeletedById",
+                        column: x => x.DeletedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SubmissionDetails_SurveyOptions_OptionId",
+                        column: x => x.OptionId,
+                        principalTable: "SurveyOptions",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SubmissionDetails_UserSubmissions_UserSubmissionId",
+                        column: x => x.UserSubmissionId,
+                        principalTable: "UserSubmissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -348,6 +416,22 @@ namespace SurveyBasket.Migrations
                 name: "IX_RefreshTokens_UserId",
                 table: "RefreshTokens",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubmissionDetails_DeletedById",
+                table: "SubmissionDetails",
+                column: "DeletedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubmissionDetails_OptionId",
+                table: "SubmissionDetails",
+                column: "OptionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubmissionDetails_UserSubmissionId_QuestionId",
+                table: "SubmissionDetails",
+                columns: new[] { "UserSubmissionId", "QuestionId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_SurveyOptions_CreatedById",
@@ -411,6 +495,22 @@ namespace SurveyBasket.Migrations
                 name: "IX_Surveys_UpdatedById",
                 table: "Surveys",
                 column: "UpdatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSubmissions_DeletedById",
+                table: "UserSubmissions",
+                column: "DeletedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSubmissions_SurveyId_UserId",
+                table: "UserSubmissions",
+                columns: new[] { "SurveyId", "UserId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSubmissions_UserId",
+                table: "UserSubmissions",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -435,10 +535,16 @@ namespace SurveyBasket.Migrations
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
-                name: "SurveyOptions");
+                name: "SubmissionDetails");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "SurveyOptions");
+
+            migrationBuilder.DropTable(
+                name: "UserSubmissions");
 
             migrationBuilder.DropTable(
                 name: "SurveyQuestions");

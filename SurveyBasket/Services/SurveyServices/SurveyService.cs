@@ -49,7 +49,7 @@ public class SurveyService(ISurveyRepository surveyRepository) : ISurveyService
         if (await surveyRepository.ExistByTitleWithDifferentIdAsync(request.Title, id, token))
             return Result.Failure(SurveyError.Conflict());
 
-        // Apply updates
+
         survey.Title = request.Title;
         survey.Summary = request.Summary;
         survey.StartsAt = request.StartsAt;
@@ -88,5 +88,17 @@ public class SurveyService(ISurveyRepository surveyRepository) : ISurveyService
             return Result.Failure<ICollection<SurveyResponse>>(SystemError.Database());
 
         return Result.Success(surveys.Adapt<ICollection<SurveyResponse>>());
+    }
+    public async Task<Result> RestoreSurveyAsync(int surveyId, CancellationToken token = default)
+    {
+        Survey? survey = await surveyRepository.GetByIdAsyncIncludingDeletedAsync(surveyId, token);
+        if (survey is null)
+            return Result.Failure(SurveyError.NotFound());
+        survey.IsDeleted = false;
+        survey.DeletedBy = null;
+        survey.DeletedOn = null;
+        survey.DeletedById = null;
+        await surveyRepository.UpdateAsync(survey, token);
+        return Result.Success();
     }
 }

@@ -5,29 +5,22 @@
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-
+        builder.HasIndex(x => new { x.UserSubmissionId, x.QuestionId }).IsUnique();
         builder.HasOne(d => d.Submission)
             .WithMany(s => s.SubmissionDetails)
-            .HasForeignKey(d => d.VoteId)
+            .HasForeignKey(d => d.UserSubmissionId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_SubmissionDetails_UserSubmissions_VoteId");
+            .HasConstraintName("FK_SubmissionDetails_UserSubmissions_UserSubmissionId");
 
-
-        builder.HasOne(d => d.Question)
-            .WithMany()
-            .HasForeignKey(d => d.QuestionId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.NoAction)
-            .HasConstraintName("FK_SubmissionDetails_SurveyQuestions_QuestionId");
 
 
         builder.HasOne(d => d.Option)
             .WithMany()
-            .HasForeignKey(d => d.AnswerId)
+            .HasForeignKey(d => d.OptionId)
             .IsRequired()
             .OnDelete(DeleteBehavior.NoAction)
-            .HasConstraintName("FK_SubmissionDetails_SurveyOptions_AnswerId");
+            .HasConstraintName("FK_SubmissionDetails_SurveyOptions_OptionId");// When we delete an option all 
 
         builder.ToTable("SubmissionDetails");
     }

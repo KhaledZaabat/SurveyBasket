@@ -5,12 +5,12 @@
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-
+        builder.HasIndex(x => new { x.SurveyId, x.UserId }).IsUnique();
         builder.HasOne(s => s.Survey)
             .WithMany()
             .HasForeignKey(s => s.SurveyId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict)
+            .OnDelete(DeleteBehavior.NoAction)
             .HasConstraintName("FK_UserSubmissions_Surveys_SurveyId");
 
 
@@ -22,12 +22,7 @@
             .HasConstraintName("FK_UserSubmissions_Users_UserId");
 
 
-        builder.HasMany(s => s.SubmissionDetails)
-            .WithOne(d => d.Submission)
-            .HasForeignKey(d => d.VoteId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_UserSubmissions_SubmissionDetails_VoteId");
+
 
         builder.Property(s => s.SubmittedOn)
             .IsRequired()

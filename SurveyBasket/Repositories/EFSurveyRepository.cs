@@ -17,8 +17,8 @@ public class EFSurveyRepository(AppDbContext db) : ISurveyRepository
     public async Task<ICollection<Survey>> GetAllIncludingDeletedAsync(CancellationToken cancellationToken = default) =>
          await db.Surveys.IgnoreQueryFilters().AsNoTracking().ToListAsync(cancellationToken);
 
-    public Task<Survey?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-        => db.Surveys.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+    public Task<Survey?> GetByIdAsync(int surveyId, CancellationToken cancellationToken = default)
+        => db.Surveys.FirstOrDefaultAsync(p => p.Id == surveyId, cancellationToken);
 
     public async Task UpdateAsync(Survey survey, CancellationToken cancellationToken = default)
     {
@@ -31,8 +31,8 @@ public class EFSurveyRepository(AppDbContext db) : ISurveyRepository
         db.Surveys.Remove(survey);
         await db.SaveChangesAsync(cancellationToken);
     }
-    public async Task<bool> ExistByIdAsync(int id, CancellationToken cancellationToken = default)
-        => await db.Surveys.AnyAsync(e => e.Id == id, cancellationToken);
+    public async Task<bool> ExistByIdAsync(int surveyId, CancellationToken cancellationToken = default)
+        => await db.Surveys.AnyAsync(e => e.Id == surveyId, cancellationToken);
     public async Task<bool> ExistByTitleAsync(string title, CancellationToken cancellationToken = default)
            => await db.Surveys.AnyAsync(e => e.Title == title, cancellationToken);
     public async Task<bool> ExistByTitleWithDifferentIdAsync(string title, int id, CancellationToken cancellationToken = default)
@@ -44,4 +44,29 @@ public class EFSurveyRepository(AppDbContext db) : ISurveyRepository
         .Where(s => DateOnly.FromDateTime(DateTime.UtcNow) >= s.StartsAt
         && DateOnly.FromDateTime(DateTime.UtcNow) <= s.EndsAt && s.Status.IsPublished).ToListAsync(cancellationToken);
 
+    public async Task<bool> IsSurveyClosed(int surveyId, CancellationToken cancellationToken = default)
+        => await db.Surveys.AnyAsync(s =>
+            s.Id == surveyId &&
+            DateOnly.FromDateTime(DateTime.UtcNow) > s.EndsAt &&
+            s.Status.IsPublished,
+            cancellationToken);
+
+    public async Task<bool> IsSurveyNotStarted(int surveyId, CancellationToken cancellationToken = default)
+        => await db.Surveys.AnyAsync(s =>
+            s.Id == surveyId &&
+            DateOnly.FromDateTime(DateTime.UtcNow) < s.StartsAt &&
+            s.Status.IsPublished,
+            cancellationToken);
+
+    public async Task<bool> IsSurveyAvailable(int surveyId, CancellationToken cancellationToken = default)
+    => await db.Surveys.AnyAsync(s =>
+        s.Id == surveyId &&
+        s.Status.IsPublished &&
+        DateOnly.FromDateTime(DateTime.UtcNow) >= s.StartsAt &&
+        DateOnly.FromDateTime(DateTime.UtcNow) <= s.EndsAt &&
+        !s.IsDeleted,
+        cancellationToken);
+
+    public async Task<Survey?> GetByIdAsyncIncludingDeletedAsync(int surveyId, CancellationToken cancellationToken = default)
+        => await db.Surveys.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == surveyId, cancellationToken);
 }

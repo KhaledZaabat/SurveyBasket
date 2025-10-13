@@ -1,6 +1,8 @@
-﻿namespace SurveyBasket.Domain.Entities;
+﻿using SurveyBasket.Domain.Common;
 
-public sealed class UserSubmission
+namespace SurveyBasket.Domain.Entities;
+
+public sealed class UserSubmission : ISoftDeletable
 {
     public int Id { get; set; }
     public int SurveyId { get; set; }
@@ -11,4 +13,10 @@ public sealed class UserSubmission
     public Survey Survey { get; set; } = default!;
     public ApplicationUser User { get; set; } = default!;
     public ICollection<SubmissionDetail> SubmissionDetails { get; set; } = [];
+
+    public bool IsDeleted { get; set; }
+    public string? DeletedById { get; set; }
+    public DateTime? DeletedOn { get; set; }
+    public ApplicationUser? DeletedBy { get; set; }
+
 }

@@ -66,4 +66,13 @@ public class SurveysController(ISurveyService _surveyService) : ControllerBase
     => (await _surveyService.GetCurrentSurveysAsync(token))
         .ToActionResult(context: HttpContext);
 
+    [HttpPatch("{surveyId}/restore")]
+    public async Task<IActionResult> RestoreSurveyQuestion([FromRoute] int surveyId,
+        CancellationToken token = default)
+    {
+        Result result = await _surveyService.RestoreSurveyAsync(surveyId, token);
+        if (result is SuccessResult) return NoContent();
+        return result.ToProblem(HttpContext);
+
+    }
 }

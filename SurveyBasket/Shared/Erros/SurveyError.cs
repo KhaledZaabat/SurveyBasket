@@ -13,4 +13,6 @@ public sealed record SurveyError(int StatusCode, string Code, string Description
         => new(StatusCodes.Status403Forbidden, "Survey.UnauthorizedAccess", description);
     public static SurveyError Conflict(string description = "A survey with this title already exists")
       => new(StatusCodes.Status409Conflict, "Survey.Conflict", description);
+    public static SurveyError NotOpened(string description = "Survey has not been opened yet")
+    => new(StatusCodes.Status400BadRequest, "Survey.NotOpened", description);
 }

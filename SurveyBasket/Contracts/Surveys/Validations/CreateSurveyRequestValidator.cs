@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Contracts.Polls.Requests;
-
-namespace SurveyBasket.Contracts.Polls.Validations;
+﻿namespace SurveyBasket.Contracts.Polls.Validations;
 
 public class CreateSurveyRequestValidator : AbstractValidator<CreateSurveyRequest>
 {
@@ -16,7 +14,7 @@ public class CreateSurveyRequestValidator : AbstractValidator<CreateSurveyReques
 
         RuleFor(x => x.StartsAt)
             .NotEmpty()
-            .GreaterThanOrEqualTo(DateOnly.FromDateTime(DateTime.Today));
+            .GreaterThanOrEqualTo(DateOnly.FromDateTime(DateTime.UtcNow));
 
         RuleFor(x => x.EndsAt)
             .NotEmpty();

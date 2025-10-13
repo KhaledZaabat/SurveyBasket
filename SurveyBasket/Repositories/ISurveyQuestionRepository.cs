@@ -14,5 +14,6 @@ public interface ISurveyQuestionRepository : IScopedService
 
     public Task<bool> UpdateAsync(int surveyId, int questionId, SurveyQuestion updatedSurveyQuestion, CancellationToken token = default);
     public Task<bool> ExistByContentWithDifferentId(int surveyId, int questionId, string content, CancellationToken token = default);
+    public Task<ICollection<SurveyQuestion>> GetAvailableQuestionAsync(int surveyId, CancellationToken cancellationToken = default);
 }
 

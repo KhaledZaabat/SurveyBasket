@@ -12,8 +12,8 @@ using SurveyBasket.Persistence.Data;
 namespace SurveyBasket.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251012165547_AddedTables")]
-    partial class AddedTables
+    [Migration("20251012223525_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -239,22 +239,32 @@ namespace SurveyBasket.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AnswerId")
+                    b.Property<string>("DeletedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("OptionId")
                         .HasColumnType("int");
 
                     b.Property<int>("QuestionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("VoteId")
+                    b.Property<int>("UserSubmissionId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AnswerId");
+                    b.HasIndex("DeletedById");
 
-                    b.HasIndex("QuestionId");
+                    b.HasIndex("OptionId");
 
-                    b.HasIndex("VoteId");
+                    b.HasIndex("UserSubmissionId", "QuestionId")
+                        .IsUnique();
 
                     b.ToTable("SubmissionDetails", (string)null);
                 });
@@ -445,6 +455,15 @@ namespace SurveyBasket.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("DeletedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("SubmittedOn")
                         .HasColumnType("datetime2");
 
@@ -457,9 +476,12 @@ namespace SurveyBasket.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SurveyId");
+                    b.HasIndex("DeletedById");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("SurveyId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("UserSubmissions", (string)null);
                 });
@@ -557,30 +579,27 @@ namespace SurveyBasket.Migrations
 
             modelBuilder.Entity("SurveyBasket.Domain.Entities.SubmissionDetail", b =>
                 {
+                    b.HasOne("SurveyBasket.Domain.Entities.ApplicationUser", "DeletedBy")
+                        .WithMany()
+                        .HasForeignKey("DeletedById");
+
                     b.HasOne("SurveyBasket.Domain.Entities.SurveyOption", "Option")
                         .WithMany()
-                        .HasForeignKey("AnswerId")
+                        .HasForeignKey("OptionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_SubmissionDetails_SurveyOptions_AnswerId");
-
-                    b.HasOne("SurveyBasket.Domain.Entities.SurveyQuestion", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_SubmissionDetails_SurveyQuestions_QuestionId");
+                        .HasConstraintName("FK_SubmissionDetails_SurveyOptions_OptionId");
 
                     b.HasOne("SurveyBasket.Domain.Entities.UserSubmission", "Submission")
                         .WithMany("SubmissionDetails")
-                        .HasForeignKey("VoteId")
+                        .HasForeignKey("UserSubmissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_UserSubmissions_SubmissionDetails_VoteId");
+                        .HasConstraintName("FK_SubmissionDetails_UserSubmissions_UserSubmissionId");
+
+                    b.Navigation("DeletedBy");
 
                     b.Navigation("Option");
-
-                    b.Navigation("Question");
 
                     b.Navigation("Submission");
                 });
@@ -709,10 +728,14 @@ namespace SurveyBasket.Migrations
 
             modelBuilder.Entity("SurveyBasket.Domain.Entities.UserSubmission", b =>
                 {
+                    b.HasOne("SurveyBasket.Domain.Entities.ApplicationUser", "DeletedBy")
+                        .WithMany()
+                        .HasForeignKey("DeletedById");
+
                     b.HasOne("SurveyBasket.Domain.Entities.Survey", "Survey")
                         .WithMany()
                         .HasForeignKey("SurveyId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_UserSubmissions_Surveys_SurveyId");
 
@@ -722,6 +745,8 @@ namespace SurveyBasket.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_UserSubmissions_Users_UserId");
+
+                    b.Navigation("DeletedBy");
 
                     b.Navigation("Survey");
 
