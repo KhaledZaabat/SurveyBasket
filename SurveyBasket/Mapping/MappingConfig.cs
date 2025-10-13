@@ -1,4 +1,4 @@
-﻿using Mapster;
+﻿using SurveyBasket.Contracts.SubmissionDetails.Requests;
 using SurveyBasket.Contracts.SurveyOptions.Responses;
 
 namespace SurveyBasket.Mapping;
@@ -56,7 +56,11 @@ public class MappingConfig : IRegister
               .Map(dest => dest.SurveyOptions,
                 src => src.SurveyQuestions.Select(a => new SurveyOption { Content = a }).ToList());
 
-
+        config.NewConfig<SubmissionDetailRequest, SubmissionDetail>()
+            .Map(des => des.OptionId, src => src.OptionId)
+            .Map(des => des.QuestionId, src => src.QuestionId).TwoWays();
+        config.NewConfig<UserSubmissionRequest, UserSubmission>()
+            .Map(des => des.SubmissionDetails, src => src.submissionDetails);
     }
 }
 

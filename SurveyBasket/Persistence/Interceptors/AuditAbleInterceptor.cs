@@ -1,25 +1,43 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using SurveyBasket.Domain.Common;
-using System.Security.Claims;
 
 namespace SurveyBasket.Persistence.Interceptors;
 
 public class AuditAbleInterceptor(IHttpContextAccessor _accessor) : SaveChangesInterceptor
 {
-    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
+    public override InterceptionResult<int> SavingChanges(
+        DbContextEventData eventData,
+        InterceptionResult<int> result)
     {
-        if (eventData.Context is null)
-            return result;
-
-
         if (eventData.Context is not AppDbContext context)
             return result;
 
         if (context.DisableAuditing)
             return result;
 
+        ApplyAuditing(eventData);
+        return result;
+    }
+
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData,
+        InterceptionResult<int> result,
+        CancellationToken cancellationToken = default)
+    {
+        if (eventData.Context is not AppDbContext context)
+            return new(result);
+
+        if (context.DisableAuditing)
+            return new(result);
+
+        ApplyAuditing(eventData);
+        return new(result);
+    }
+
+    private void ApplyAuditing(DbContextEventData eventData)
+    {
         var entries = eventData.Context.ChangeTracker.Entries<IAuditable>();
-        var currentUserId = _accessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = _accessor.HttpContext.User.GetUserId();
         foreach (var entityEntry in entries)
         {
 
@@ -40,52 +58,5 @@ public class AuditAbleInterceptor(IHttpContextAccessor _accessor) : SaveChangesI
 
             }
         }
-
-        return result;
     }
-
-    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
-    {
-
-        if (eventData.Context is null)
-            return new ValueTask<InterceptionResult<int>>(result);
-
-
-        if (eventData.Context is not AppDbContext context)
-            return new ValueTask<InterceptionResult<int>>(result);
-
-        if (context.DisableAuditing)
-            return new ValueTask<InterceptionResult<int>>(result); // 🚫 skip interceptor
-
-
-        var entries = eventData.Context.ChangeTracker.Entries<IAuditable>();
-        var currentUserId = _accessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        foreach (var entityEntry in entries)
-        {
-
-            if (entityEntry.State == EntityState.Added)
-            {
-
-                entityEntry.Property(x => x.CreatedById).CurrentValue = currentUserId;
-                entityEntry.Property(x => x.CreatedOn).CurrentValue = DateTime.UtcNow;
-
-            }
-            else if (entityEntry.State == EntityState.Modified)
-            {
-
-
-                entityEntry.Property(x => x.UpdatedById).CurrentValue = currentUserId;
-                entityEntry.Property(x => x.UpdatedOn).CurrentValue = DateTime.UtcNow;
-
-
-            }
-        }
-
-
-        return new ValueTask<InterceptionResult<int>>(result);
-    }
-
-
-
-
 }

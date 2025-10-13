@@ -1,21 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using SurveyBasket.Helpers;
 using SurveyBasket.Services.SurveyQuestions;
-using System.Security.Claims;
+using SurveyBasket.Services.UserSubmissionServices;
 
 namespace SurveyBasket.Controllers
 {
     [Route("api/Surveys/{surveyId}/Submissions")]
     [ApiController]
     [Authorize]
-    public class UserSubmissionController(ISurveyQuestionService questionService) : ControllerBase
+    public class UserSubmissionController(ISurveyQuestionService questionService, IUserSubmissionService submissionService) : ControllerBase
     {
 
         [HttpGet("/api/Surveys/{surveyId}/Available")]
 
         public async Task<ActionResult<ICollection<SurveyQuestionResponse>>> GetAvailableQuestionAsync([FromRoute] int SurveyId, CancellationToken cancellationToken)
         {
-            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? userId = User.GetUserId();
 
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
@@ -26,6 +25,23 @@ namespace SurveyBasket.Controllers
 
         }
 
+        /// <summary>
+        /// Adds a new submission for a survey by the currently authenticated user.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> AddSubmissionAsync(
+            [FromRoute] int surveyId,
+            [FromBody] UserSubmissionRequest request,
+            CancellationToken cancellationToken)
+        {
+            string? userId = User.GetUserId();
 
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            Result result = await submissionService.AddAsync(surveyId, userId, request, cancellationToken);
+            if (result is SuccessResult) return NoContent();
+            return result.ToProblem(HttpContext);
+        }
     }
 }

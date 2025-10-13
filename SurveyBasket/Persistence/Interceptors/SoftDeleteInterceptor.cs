@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using SurveyBasket.Domain.Common;
-using System.Security.Claims;
 
 namespace SurveyBasket.Persistence.Interceptors;
 
@@ -37,7 +36,7 @@ public class SoftDeleteInterceptor(IHttpContextAccessor _accessor) : SaveChanges
             return new ValueTask<InterceptionResult<int>>(result);
 
         if (context.DisableSoftDeletion)
-            return new ValueTask<InterceptionResult<int>>(result); // 🚫 skip interceptor
+            return new ValueTask<InterceptionResult<int>>(result);
         ApplySoftDelete(eventData);
         return new ValueTask<InterceptionResult<int>>(result);
     }
@@ -45,7 +44,7 @@ public class SoftDeleteInterceptor(IHttpContextAccessor _accessor) : SaveChanges
     private void ApplySoftDelete(DbContextEventData eventData)
     {
         var entries = eventData.Context.ChangeTracker.Entries<ISoftDeletable>();
-        var currentUserId = _accessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = _accessor.HttpContext?.User.GetUserId();
 
         foreach (var entry in entries)
         {
@@ -66,3 +65,8 @@ public class SoftDeleteInterceptor(IHttpContextAccessor _accessor) : SaveChanges
         }
     }
 }
+
+
+
+
+

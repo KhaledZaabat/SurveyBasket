@@ -266,7 +266,7 @@ namespace SurveyBasket.Migrations
                     b.HasIndex("UserSubmissionId", "QuestionId")
                         .IsUnique();
 
-                    b.ToTable("SubmissionDetails", (string)null);
+                    b.ToTable("SubmissionDetail", (string)null);
                 });
 
             modelBuilder.Entity("SurveyBasket.Domain.Entities.Survey", b =>
@@ -591,7 +591,7 @@ namespace SurveyBasket.Migrations
                         .HasConstraintName("FK_SubmissionDetails_SurveyOptions_OptionId");
 
                     b.HasOne("SurveyBasket.Domain.Entities.UserSubmission", "Submission")
-                        .WithMany("SubmissionDetails")
+                        .WithMany("SubmissionDetail")
                         .HasForeignKey("UserSubmissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -770,7 +770,7 @@ namespace SurveyBasket.Migrations
 
             modelBuilder.Entity("SurveyBasket.Domain.Entities.UserSubmission", b =>
                 {
-                    b.Navigation("SubmissionDetails");
+                    b.Navigation("SubmissionDetail");
                 });
 #pragma warning restore 612, 618
         }

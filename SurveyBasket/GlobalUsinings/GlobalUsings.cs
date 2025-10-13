@@ -1,4 +1,5 @@
 ﻿global using FluentValidation;
+global using Mapster;
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,10 @@ global using SurveyBasket.Contracts.Polls.Requests;
 global using SurveyBasket.Contracts.Polls.Responses;
 global using SurveyBasket.Contracts.SurveyQuestion.Requests;
 global using SurveyBasket.Contracts.SurveyQuestion.Responses;
+global using SurveyBasket.Contracts.UserSubmission.Requests;
+global using SurveyBasket.Contracts.UserSubmission.Validators;
 global using SurveyBasket.Domain.Entities;
+global using SurveyBasket.Helpers;
 global using SurveyBasket.Infrastructure.DependencyInjection;
 global using SurveyBasket.Persistence.Data;
 global using SurveyBasket.Repositories;

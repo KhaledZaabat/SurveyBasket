@@ -340,7 +340,7 @@ namespace SurveyBasket.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SubmissionDetails",
+                name: "SubmissionDetail",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -419,17 +419,17 @@ namespace SurveyBasket.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubmissionDetails_DeletedById",
-                table: "SubmissionDetails",
+                table: "SubmissionDetail",
                 column: "DeletedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubmissionDetails_OptionId",
-                table: "SubmissionDetails",
+                table: "SubmissionDetail",
                 column: "OptionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubmissionDetails_UserSubmissionId_QuestionId",
-                table: "SubmissionDetails",
+                table: "SubmissionDetail",
                 columns: new[] { "UserSubmissionId", "QuestionId" },
                 unique: true);
 
@@ -535,7 +535,7 @@ namespace SurveyBasket.Migrations
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
-                name: "SubmissionDetails");
+                name: "SubmissionDetail");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

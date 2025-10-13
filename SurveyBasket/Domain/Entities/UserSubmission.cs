@@ -4,6 +4,7 @@ namespace SurveyBasket.Domain.Entities;
 
 public sealed class UserSubmission : ISoftDeletable
 {
+
     public int Id { get; set; }
     public int SurveyId { get; set; }
     public string UserId { get; set; } = string.Empty;

@@ -18,6 +18,9 @@ public sealed record UserError(int StatusCode, string Code, string Description)
     public static UserError Conflict(string description = "Conflict")
         => new(StatusCodes.Status409Conflict, "User.Conflict", description);
 
+    public static UserError InvalidSubmission(string description = "Invalid submission data")
+        => new(StatusCodes.Status400BadRequest, "User.InvalidSubmission", description);
+
 }
 
 //public sealed record Error(int StatusCode, string Description)
