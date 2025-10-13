@@ -11,17 +11,18 @@ namespace SurveyBasket.Controllers
     public class UserSubmissionController(ISurveyQuestionService questionService) : ControllerBase
     {
 
-        [HttpGet]
-        public async Task<IActionResult> Start([FromRoute] int pollId, CancellationToken cancellationToken)
+        [HttpGet("/api/Surveys/{surveyId}/Available")]
+
+        public async Task<ActionResult<ICollection<SurveyQuestionResponse>>> GetAvailableQuestionAsync([FromRoute] int SurveyId, CancellationToken cancellationToken)
         {
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            Result<ICollection<SurveyQuestionResponse>> result = await questionService.GetAvailableQuestionAsync(pollId, userId!, cancellationToken);
+            Result<ICollection<SurveyQuestionResponse>> result = await questionService.GetAvailableQuestionAsync(SurveyId, userId!, cancellationToken);
 
-            return result.ToProblem(HttpContext);
+            return result.ToActionResult<ICollection<SurveyQuestionResponse>>(HttpContext);
 
         }
 

@@ -55,8 +55,15 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
             return Result.Failure(SurveyQuestionError.SurveyNotFound());
         if (!await questionsRepo.ExistByIdAsyncIgnoredFilter(surveyId, questionId, token))
             return Result.Failure(SurveyQuestionError.SurveyQuestionNotFound());
+        SurveyQuestion? question = await questionsRepo.GetByIdIgnoringDeletionFilterAsync(surveyId, questionId, token);
+        if (question is null)
+            return Result.Failure(SystemError.Database());
 
-        bool Restored = await questionsRepo.RestoreSurveyQuestion(surveyId: surveyId, questionId: questionId, token);
+        question.IsDeleted = false;
+        question.DeletedBy = null;
+        question.DeletedOn = null;
+        question.DeletedById = null;
+        bool Restored = await questionsRepo.UpdateEntityAsync(question, token);
         if (!Restored)
             return Result.Failure(SystemError.Database());
 
@@ -66,11 +73,13 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
     {
         if (!await surveyReop.ExistByIdAsync(surveyId, token))
             return Result.Failure(SurveyQuestionError.SurveyNotFound());
+        SurveyQuestion? question = await questionsRepo.GetByIdAsync(surveyId, questionId, token);
 
-        if (!await questionsRepo.ExistByIdAsync(surveyId, questionId, token))
+        if (question is null)
             return Result.Failure(SurveyQuestionError.SurveyQuestionNotFound());
 
-        bool deleted = await questionsRepo.DeleteSurveyQuestionAsync(surveyId, questionId, token);
+        bool deleted = await questionsRepo.DeleteAsync(question, token);
+
         if (!deleted)
             return Result.Failure(SystemError.Database());
 
@@ -88,7 +97,7 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
             return Result.Failure(SurveyQuestionError.ConflictSurveyQuestion());
 
         SurveyQuestion question = updateRequest.Adapt<SurveyQuestion>();
-        bool updated = await questionsRepo.UpdateAsync(surveyId, questionId, question, token);
+        bool updated = await questionsRepo.UpdateWithOptionsResetAsync(surveyId, questionId, question, token);
         if (!updated)
             return Result.Failure(SystemError.Database());
 
@@ -98,7 +107,7 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
     public async Task<Result<ICollection<SurveyQuestionResponse>>> GetAvailableQuestionAsync(
     int surveyId, string userId, CancellationToken token)
     {
-        if (await submissionRepo.SubmittedBeforeAsync(userId, token))
+        if (await submissionRepo.SubmittedBeforeAsync(surveyId, userId, token))
             return Result.Failure<ICollection<SurveyQuestionResponse>>(UserSubmissionError.DuplicateSubmission());
 
         if (!await surveyReop.ExistByIdAsync(surveyId, token))

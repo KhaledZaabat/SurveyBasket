@@ -27,7 +27,11 @@
         builder.Property(s => s.SubmittedOn)
             .IsRequired()
             .HasColumnType("datetime2");
-
+        builder.ToTable("UserSubmissions", tb =>
+        {
+            tb.HasTrigger("trg_UserSubmission_CascadeSoftDelete");
+            tb.HasTrigger("trg_UserSubmission_CascadeRestore");
+        });
         builder.ToTable("UserSubmissions");
     }
 }

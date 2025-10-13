@@ -46,5 +46,6 @@
             tb.HasTrigger("trg_SurveyQuestion_CascadeSoftDelete");
             tb.HasTrigger("trg_SurveyQuestion_CascadeRestore");
         });
+
     }
 }

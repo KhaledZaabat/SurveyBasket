@@ -44,11 +44,11 @@
             .HasConstraintName("FK_Surveys_SurveyQuestions_SurveyId");
 
         builder.HasQueryFilter(b => b.IsDeleted == false);
-
         builder.ToTable("Surveys", tb =>
         {
             tb.HasTrigger("trg_Survey_CascadeSoftDelete");
             tb.HasTrigger("trg_Survey_CascadeRestore");
         });
+
     }
 }

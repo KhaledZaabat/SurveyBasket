@@ -34,5 +34,10 @@
             .HasConstraintName("FK_SurveyOptions_SurveyQuestions_SurveyQuestionId");
 
         builder.HasQueryFilter(f => f.IsDeleted == false);
+        builder.ToTable("SurveyOptions", tb =>
+        {
+            tb.HasTrigger("trg_SurveyOption_CascadeSoftDelete");
+            tb.HasTrigger("trg_SurveyOption_CascadeRestore");
+        });
     }
 }

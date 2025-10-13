@@ -50,7 +50,7 @@ public class SurveyQuestionsController(ISurveyQuestionService questionService) :
         return result.ToProblem(HttpContext);
 
     }
-    [HttpDelete("{questionId}")]
+    [HttpDelete("{questionId}/delete")]
 
     public async Task<IActionResult> DeleteSurveyQuestion([FromRoute] int surveyId,
 [FromRoute] int questionId,
@@ -62,7 +62,15 @@ CancellationToken token = default)
 
         return result.ToProblem(HttpContext);
     }
-
+    [HttpPut("{questionId}")]
+    public async Task<IActionResult> UpdateQuestion([FromRoute] int surveyId,
+       [FromRoute] int questionId, UpdateSurveyQuestionRequest updateRequest,
+       CancellationToken token = default)
+    {
+        Result result = await questionService.UpdateSurveyQuestionAsync(surveyId, questionId, updateRequest, token);
+        if (result is SuccessResult) return NoContent();
+        return result.ToProblem(HttpContext);
+    }
 
 }
 

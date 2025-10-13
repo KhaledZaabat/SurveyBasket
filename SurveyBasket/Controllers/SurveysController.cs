@@ -72,7 +72,7 @@ public class SurveysController(ISurveyService _surveyService) : ControllerBase
     {
         Result result = await _surveyService.RestoreSurveyAsync(surveyId, token);
         if (result is SuccessResult) return NoContent();
-        return result.ToProblem(HttpContext);
+        return result.ToActionResult(HttpContext);
 
     }
 }
