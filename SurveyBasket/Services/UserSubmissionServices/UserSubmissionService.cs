@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Services.UserSubmissionServices;
 
-using Mapster;
+
 
 public class UserSubmissionService(IUserSubmissionsRepository submissionRepo, ISurveyRepository surveyReop, ISurveyQuestionRepository questionRepo) : IUserSubmissionService
 {
@@ -41,6 +41,7 @@ public class UserSubmissionService(IUserSubmissionsRepository submissionRepo, IS
         UserSubmission submission = request.Adapt<UserSubmission>();
         submission.UserId = userId;
         submission.SurveyId = surveyId;
+        submission.SubmittedOn = DateTime.UtcNow;
         await submissionRepo.AddAsync(submission, cancellationToken);
         return Result.Success();
 

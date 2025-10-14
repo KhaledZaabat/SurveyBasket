@@ -22,7 +22,7 @@
             .HasConstraintName("FK_UserSubmissions_Users_UserId");
 
 
-
+        builder.HasQueryFilter(f => f.IsDeleted == false);
 
         builder.Property(s => s.SubmittedOn)
             .IsRequired()

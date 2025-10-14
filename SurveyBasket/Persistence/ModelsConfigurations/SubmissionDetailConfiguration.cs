@@ -21,7 +21,7 @@
             .IsRequired()
             .OnDelete(DeleteBehavior.NoAction)
             .HasConstraintName("FK_SubmissionDetails_SurveyOptions_OptionId");// When we delete an option all 
-
+        builder.HasQueryFilter(f => f.IsDeleted == false);
         builder.ToTable("SubmissionDetails");
     }
 }

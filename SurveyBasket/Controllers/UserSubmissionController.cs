@@ -10,6 +10,10 @@ namespace SurveyBasket.Controllers
     public class UserSubmissionController(ISurveyQuestionService questionService, IUserSubmissionService submissionService) : ControllerBase
     {
 
+        /// <summary>
+        /// Gets all The questions for a survey (must be open and published) with its options
+        /// </summary>
+
         [HttpGet("/api/Surveys/{surveyId}/Available")]
 
         public async Task<ActionResult<ICollection<SurveyQuestionResponse>>> GetAvailableQuestionAsync([FromRoute] int SurveyId, CancellationToken cancellationToken)
@@ -43,5 +47,7 @@ namespace SurveyBasket.Controllers
             if (result is SuccessResult) return NoContent();
             return result.ToProblem(HttpContext);
         }
+
+
     }
 }

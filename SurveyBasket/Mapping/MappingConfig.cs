@@ -1,5 +1,5 @@
-﻿using SurveyBasket.Contracts.SubmissionDetails.Requests;
-using SurveyBasket.Contracts.SurveyOptions.Responses;
+﻿
+
 
 namespace SurveyBasket.Mapping;
 
@@ -56,11 +56,34 @@ public class MappingConfig : IRegister
               .Map(dest => dest.SurveyOptions,
                 src => src.SurveyQuestions.Select(a => new SurveyOption { Content = a }).ToList());
 
+
+
         config.NewConfig<SubmissionDetailRequest, SubmissionDetail>()
             .Map(des => des.OptionId, src => src.OptionId)
             .Map(des => des.QuestionId, src => src.QuestionId).TwoWays();
         config.NewConfig<UserSubmissionRequest, UserSubmission>()
             .Map(des => des.SubmissionDetails, src => src.submissionDetails);
+
+
+        config.NewConfig<SubmissionDetail, QuestionOptionResponse>()
+            .Map(des => des.Answer, src => src.OptionId)
+            .Map(des => des.Question, src => src.QuestionId);
+
+
+
+        config.NewConfig<Survey, SurveySubmissionsResponse>()
+            .Map(des => des.Title, src => src.Title)
+            .Map(des => des.Submissions, src => src.CreatedBy.UserSubmissions);
+
+        config.NewConfig<UserSubmission, SubmissionResponse>()
+         .Map(des => des.SubmittedDate, src => src.SubmittedOn)
+         .Map(des => des.SubmitterName, src => $"{src.User.FirstName} {src.User.LastName}")
+         .Map(des => des.SelectedAnswers, src => src.SubmissionDetails);
+
+        config.NewConfig<List<UserSubmission>, SurveySubmissionsResponse>()
+            .Map(des => des.Title, src => src.FirstOrDefault()!.Survey.Title)
+   .Map(des => des.Submissions, src => src.Adapt<List<SubmissionResponse>>());
+
     }
 }
 
