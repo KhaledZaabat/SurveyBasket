@@ -40,6 +40,19 @@ services:
       - "6379:6379"
     networks:
       - surveybasket-net
+  ops.seq:
+    image: datalust/seq:latest
+    container_name: Ops.Seq
+    volumes:
+      - seq_data:/data
+    environment:
+      - ACCEPT_EULA=Y
+    networks:
+      - surveybasket-net
+    ports:
+      - 5341:5341
+      - 8081:80
+
 
 networks:
   surveybasket-net:
@@ -47,3 +60,4 @@ networks:
 
 volumes:
   sql_data:
+  seq_data:

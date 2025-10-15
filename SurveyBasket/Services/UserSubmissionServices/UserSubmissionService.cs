@@ -2,34 +2,40 @@
 
 namespace SurveyBasket.Services.UserSubmissionServices;
 
-
-
-public class UserSubmissionService(IUserSubmissionsRepository submissionRepo, ISurveyRepository surveyReop, ISurveyQuestionRepository questionRepo) : IUserSubmissionService
+public class UserSubmissionService(
+    IUserSubmissionsRepository submissionRepo,
+    ISurveyRepository surveyRepo,
+    ISurveyQuestionRepository questionRepo,
+    ILogger<UserSubmissionService> logger) : IUserSubmissionService
 {
     public async Task<Result> AddAsync(int surveyId, string userId, UserSubmissionRequest request, CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("User {UserId} submitting survey ID {SurveyId}", userId, surveyId);
 
         if (await submissionRepo.IsSubmittedBeforeAsync(surveyId, userId, cancellationToken))
             return Result.Failure(UserSubmissionError.DuplicateSubmission());
 
-
-        if (!await surveyReop.ExistByIdAsync(surveyId, cancellationToken))
+        if (!await surveyRepo.ExistByIdAsync(surveyId, cancellationToken))
             return Result.Failure<ICollection<SurveyQuestionResponse>>(SurveyError.NotFound());
 
-
-        if (await surveyReop.IsSurveyNotStarted(surveyId, cancellationToken))
+        if (await surveyRepo.IsSurveyNotStarted(surveyId, cancellationToken))
             return Result.Failure<ICollection<SurveyQuestionResponse>>(SurveyError.NotOpened("The survey has not started yet."));
 
-
-        if (await surveyReop.IsSurveyClosed(surveyId, cancellationToken))
+        if (await surveyRepo.IsSurveyClosed(surveyId, cancellationToken))
             return Result.Failure<ICollection<SurveyQuestionResponse>>(SurveyError.AlreadyClosed());
-        if (!await surveyReop.IsSurveyAvailable(surveyId, cancellationToken))
-            return Result.Failure<ICollection<SurveyQuestionResponse>>(SurveyError.NotOpened("The survey is not available or not published."));
 
-        ICollection<int> QuestionIds = request.submissionDetails.Select(d => d.QuestionId).ToList();
-        ICollection<SurveyQuestion> questions = await questionRepo.GetAvailableQuestionAsync(surveyId, cancellationToken);
-        if (!questions.Select(q => q.Id).SequenceEqual(QuestionIds))
-            return Result.Failure(UserError.InvalidSubmission("U did Not filled the required Questions"));
+        if (!await surveyRepo.IsSurveyAvailable(surveyId, cancellationToken))
+            return Result.Failure<ICollection<SurveyQuestionResponse>>(SurveyError.NotOpened("Survey not available or published."));
+
+        ICollection<int> questionIds = request.submissionDetails.Select(d => d.QuestionId).ToList();
+        var questions = await questionRepo.GetAvailableQuestionAsync(surveyId, cancellationToken);
+
+        if (!questions.Select(q => q.Id).SequenceEqual(questionIds))
+        {
+            logger.LogWarning("User {UserId} submitted invalid question set for survey {SurveyId}", userId, surveyId);
+            return Result.Failure(UserError.InvalidSubmission("You did not fill all required questions."));
+        }
+
         var validPairs = questions
             .SelectMany(q => q.SurveyOptions.Select(o => (q.Id, o.Id)))
             .ToHashSet();
@@ -39,13 +45,19 @@ public class UserSubmissionService(IUserSubmissionsRepository submissionRepo, IS
             request.submissionDetails.All(s => validPairs.Contains((s.QuestionId, s.OptionId)));
 
         if (!isValidSubmission)
+        {
+            logger.LogWarning("User {UserId} submitted invalid/mismatched options for survey ID {SurveyId}", userId, surveyId);
             return Result.Failure(UserError.InvalidSubmission("Invalid or mismatched options."));
-        UserSubmission submission = request.Adapt<UserSubmission>();
+        }
+
+        var submission = request.Adapt<UserSubmission>();
         submission.UserId = userId;
         submission.SurveyId = surveyId;
         submission.SubmittedOn = DateTime.UtcNow;
-        await submissionRepo.AddAsync(submission, cancellationToken);
-        return Result.Success();
 
+        await submissionRepo.AddAsync(submission, cancellationToken);
+
+        logger.LogInformation("User {UserId} successfully submitted survey ID {SurveyId}", userId, surveyId);
+        return Result.Success();
     }
 }

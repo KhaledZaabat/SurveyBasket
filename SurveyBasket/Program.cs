@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices(builder.Configuration);
 //After Here you Can Override
 
-
+builder.Host.UseSerilog
+    ((context, configuration) =>
+    configuration.ReadFrom.Configuration(builder.Configuration));
 
 
 
@@ -22,7 +24,7 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
-
+app.UseSerilogRequestLogging();
 app.MapControllers();
 
 app.Run();
