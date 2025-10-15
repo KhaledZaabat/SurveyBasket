@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Persistence.Interceptors;
 using System.Text;
@@ -18,7 +19,8 @@ public static class ServiceCollectionExtensions
            .AddIdentityConfiguration()
            .AddJwtConfiguration(configuration)
            .ConfigureMappings()
-           .ConfigureProblems();
+           .ConfigureProblems()
+           .ConfigureCaching(configuration);
         return services;
     }
 
@@ -147,5 +149,23 @@ public static class ServiceCollectionExtensions
         }).AddProblemDetails();
         return services;
     }
+    private static IServiceCollection ConfigureCaching(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+            options.InstanceName = "survey-basket:";
+        });
 
+        services.AddHybridCache(options =>
+        {
+            options.DefaultEntryOptions = new HybridCacheEntryOptions
+            {
+                Expiration = TimeSpan.FromMinutes(10),
+                LocalCacheExpiration = TimeSpan.FromMinutes(10)
+            };
+        });
+
+        return services;
+    }
 }
