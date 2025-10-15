@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SurveyBasket.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -340,7 +340,7 @@ namespace SurveyBasket.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SubmissionDetail",
+                name: "SubmissionDetails",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -365,6 +365,12 @@ namespace SurveyBasket.Migrations
                         column: x => x.OptionId,
                         principalTable: "SurveyOptions",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SubmissionDetails_SurveyQuestions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "SurveyQuestions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_SubmissionDetails_UserSubmissions_UserSubmissionId",
                         column: x => x.UserSubmissionId,
@@ -419,17 +425,22 @@ namespace SurveyBasket.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubmissionDetails_DeletedById",
-                table: "SubmissionDetail",
+                table: "SubmissionDetails",
                 column: "DeletedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubmissionDetails_OptionId",
-                table: "SubmissionDetail",
+                table: "SubmissionDetails",
                 column: "OptionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SubmissionDetails_QuestionId",
+                table: "SubmissionDetails",
+                column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SubmissionDetails_UserSubmissionId_QuestionId",
-                table: "SubmissionDetail",
+                table: "SubmissionDetails",
                 columns: new[] { "UserSubmissionId", "QuestionId" },
                 unique: true);
 
@@ -535,7 +546,7 @@ namespace SurveyBasket.Migrations
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
-                name: "SubmissionDetail");
+                name: "SubmissionDetails");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

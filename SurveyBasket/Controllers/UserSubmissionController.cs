@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using SurveyBasket.Services.SurveyQuestions;
+﻿using SurveyBasket.Services.SurveyQuestions;
 using SurveyBasket.Services.UserSubmissionServices;
 
 namespace SurveyBasket.Controllers

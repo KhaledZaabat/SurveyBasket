@@ -1,4 +1,6 @@
-﻿namespace SurveyBasket.Services.UserSubmissionServices;
+﻿using SurveyBasket.Shared.Errors;
+
+namespace SurveyBasket.Services.UserSubmissionServices;
 
 
 
@@ -7,7 +9,7 @@ public class UserSubmissionService(IUserSubmissionsRepository submissionRepo, IS
     public async Task<Result> AddAsync(int surveyId, string userId, UserSubmissionRequest request, CancellationToken cancellationToken = default)
     {
 
-        if (await submissionRepo.SubmittedBeforeAsync(surveyId, userId, cancellationToken))
+        if (await submissionRepo.IsSubmittedBeforeAsync(surveyId, userId, cancellationToken))
             return Result.Failure(UserSubmissionError.DuplicateSubmission());
 
 

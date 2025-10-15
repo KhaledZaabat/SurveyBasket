@@ -1,10 +1,11 @@
-﻿namespace SurveyBasket.Services.Authentication
+﻿namespace SurveyBasket.Services.Authentication;
+
+public interface IAuthService : IScopedService
 {
-    public interface IAuthService : IScopedService
-    {
-        public Task<Result<AuthResponse>> LoginAsync(LoginRequest request);
-        public Task<Result<AuthResponse>> RefreshAsync(RefreshRequest request);
-        public Task<Result> RegisterAsync(RegisterRequest request);
-        // public Task<TokenResponse> Refresh(RefreshRequest request);
-    }
+    public Task<Result<AuthResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken);
+    public Task<Result<AuthResponse>> RefreshAsync(RefreshRequest request, CancellationToken cancellationToken);
+    public Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken);
+    public Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request, CancellationToken cancellationToken);
+    public Task<Result> ResendConfirmationEmailAsync(ResendConfirmationEmailRequest request, CancellationToken cancellationToken);
+
 }

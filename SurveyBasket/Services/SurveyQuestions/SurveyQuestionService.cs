@@ -107,7 +107,7 @@ public class SurveyQuestionService(ISurveyQuestionRepository questionsRepo, ISur
     public async Task<Result<ICollection<SurveyQuestionResponse>>> GetAvailableQuestionAsync(
     int surveyId, string userId, CancellationToken token)
     {
-        if (await submissionRepo.SubmittedBeforeAsync(surveyId, userId, token))
+        if (await submissionRepo.IsSubmittedBeforeAsync(surveyId, userId, token))
             return Result.Failure<ICollection<SurveyQuestionResponse>>(UserSubmissionError.DuplicateSubmission());
 
         if (!await surveyReop.ExistByIdAsync(surveyId, token))

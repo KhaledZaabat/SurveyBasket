@@ -260,10 +260,12 @@ namespace SurveyBasket.Migrations
 
                     b.HasIndex("OptionId");
 
+                    b.HasIndex("QuestionId");
+
                     b.HasIndex("UserSubmissionId", "QuestionId")
                         .IsUnique();
 
-                    b.ToTable("SubmissionDetail", (string)null);
+                    b.ToTable("SubmissionDetails", (string)null);
                 });
 
             modelBuilder.Entity("SurveyBasket.Domain.Entities.Survey", b =>
@@ -382,7 +384,14 @@ namespace SurveyBasket.Migrations
                     b.HasIndex("SurveyQuestionId", "Content")
                         .IsUnique();
 
-                    b.ToTable("SurveyOptions");
+                    b.ToTable("SurveyOptions", null, t =>
+                        {
+                            t.HasTrigger("trg_SurveyOption_CascadeRestore");
+
+                            t.HasTrigger("trg_SurveyOption_CascadeSoftDelete");
+                        });
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
             modelBuilder.Entity("SurveyBasket.Domain.Entities.SurveyQuestion", b =>
@@ -480,7 +489,14 @@ namespace SurveyBasket.Migrations
                     b.HasIndex("SurveyId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("UserSubmissions", (string)null);
+                    b.ToTable("UserSubmissions", null, t =>
+                        {
+                            t.HasTrigger("trg_UserSubmission_CascadeRestore");
+
+                            t.HasTrigger("trg_UserSubmission_CascadeSoftDelete");
+                        });
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -587,8 +603,14 @@ namespace SurveyBasket.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_SubmissionDetails_SurveyOptions_OptionId");
 
+                    b.HasOne("SurveyBasket.Domain.Entities.SurveyQuestion", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SurveyBasket.Domain.Entities.UserSubmission", "Submission")
-                        .WithMany("SubmissionDetail")
+                        .WithMany("SubmissionDetails")
                         .HasForeignKey("UserSubmissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -597,6 +619,8 @@ namespace SurveyBasket.Migrations
                     b.Navigation("DeletedBy");
 
                     b.Navigation("Option");
+
+                    b.Navigation("Question");
 
                     b.Navigation("Submission");
                 });
@@ -767,7 +791,7 @@ namespace SurveyBasket.Migrations
 
             modelBuilder.Entity("SurveyBasket.Domain.Entities.UserSubmission", b =>
                 {
-                    b.Navigation("SubmissionDetail");
+                    b.Navigation("SubmissionDetails");
                 });
 #pragma warning restore 612, 618
         }

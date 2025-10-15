@@ -34,14 +34,14 @@ public class MappingConfig : IRegister
             .Ignore(d => d.CreatedBy)
             .Ignore(d => d.CreatedById)
             .Ignore(d => d.CreatedOn)
-            .Ignore(d => d.DeletedBy)
-            .Ignore(d => d.DeletedById)
-            .Ignore(d => d.DeletedOn)
+            .Ignore(d => d.DeletedBy!)
+            .Ignore(d => d.DeletedById!)
+            .Ignore(d => d.DeletedOn!)
             .Ignore(d => d.IsDeleted)
             .Ignore(d => d.SurveyQuestionId)
-            .Ignore(d => d.UpdatedBy)
-            .Ignore(d => d.UpdatedById)
-            .Ignore(d => d.UpdatedOn).TwoWays();
+            .Ignore(d => d.UpdatedBy!)
+            .Ignore(d => d.UpdatedById!)
+            .Ignore(d => d.UpdatedOn!).TwoWays();
 
 
         config.NewConfig<SurveyQuestion, SurveyQuestionResponse>()
@@ -84,6 +84,9 @@ public class MappingConfig : IRegister
             .Map(des => des.Title, src => src.FirstOrDefault()!.Survey.Title)
    .Map(des => des.Submissions, src => src.Adapt<List<SubmissionResponse>>());
 
+
+        config.NewConfig<RegisterRequest, ApplicationUser>()
+            .Map(des => des.UserName, des => des.Email);
     }
 }
 

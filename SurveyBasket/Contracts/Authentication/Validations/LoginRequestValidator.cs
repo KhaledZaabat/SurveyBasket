@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Contracts.Authentication.Requests;
-
-namespace SurveyBasket.Contracts.Authentication.Validations;
+﻿namespace SurveyBasket.Contracts.Authentication.Validations;
 
 public class LoginRequestValidator : AbstractValidator<LoginRequest>
 {
