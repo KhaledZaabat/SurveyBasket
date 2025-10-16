@@ -10,8 +10,20 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Contracts\Authentication\Settings\**" />
+	  <Content Remove="Contracts\Authentication\Settings\**" />
+	  <EmbeddedResource Remove="Contracts\Authentication\Settings\**" />
+	  <None Remove="Contracts\Authentication\Settings\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="DotNetEnv" Version="3.1.1" />
 		<PackageReference Include="FluentValidation" Version="12.0.0" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.21" />
+		<PackageReference Include="Hangfire.Core" Version="1.8.21" />
+		<PackageReference Include="Hangfire.Dashboard.Basic.Authentication" Version="8.0.0" />
+		<PackageReference Include="Hangfire.SqlServer" Version="1.8.21" />
 		<PackageReference Include="MailKit" Version="4.14.1" />
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
@@ -41,11 +53,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Contracts\Authentication\Settings\" />
 	  <Folder Include="Contracts\SurveyOptions\Validations\" />
 	  <Folder Include="Contracts\SurveyOptions\Requests\" />
 	  <Folder Include="Enums\" />
-	  <Folder Include="Templates\" />
+	  <Folder Include="Services\Notifications\" />
 	</ItemGroup>
 
 </Project>

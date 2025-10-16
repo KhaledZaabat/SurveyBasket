@@ -19,6 +19,7 @@ public interface ISurveyRepository : IScopedService
     public Task<bool> IsSurveyNotStarted(int surveyId, CancellationToken cancellationToken = default);
     public Task<bool> IsSurveyAvailable(int surveyId, CancellationToken cancellationToken = default);
     public Task<Survey?> GetByIdAsyncIncludingDeletedAsync(int surveyId, CancellationToken cancellationToken = default);
+    public Task<ICollection<Survey>> GetPublishedTodaysSurveys(CancellationToken cancellationToken = default);
 
 
 }

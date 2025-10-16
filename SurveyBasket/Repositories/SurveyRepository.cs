@@ -2,7 +2,7 @@
 
 namespace SurveyBasket.Repositories;
 
-public class EFSurveyRepository(AppDbContext db, HybridCache cache, ILogger<EFSurveyRepository> logger) : ISurveyRepository
+public class SurveyRepository(AppDbContext db, HybridCache cache, ILogger<SurveyRepository> logger) : ISurveyRepository
 {
     private const string CurrentSurveysCacheKey = "CurrentSurveys";
 
@@ -116,4 +116,11 @@ public class EFSurveyRepository(AppDbContext db, HybridCache cache, ILogger<EFSu
 
     public async Task<Survey?> GetByIdAsyncIncludingDeletedAsync(int surveyId, CancellationToken cancellationToken = default)
         => await db.Surveys.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == surveyId, cancellationToken);
+
+
+    public async Task<ICollection<Survey>> GetPublishedTodaysSurveys(CancellationToken cancellationToken = default)
+        => await db.Surveys.AsNoTracking()
+        .Where(s => DateOnly.FromDateTime(DateTime.UtcNow) == s.StartsAt && s.Status.IsPublished)
+        .ToListAsync(cancellationToken);
+
 }

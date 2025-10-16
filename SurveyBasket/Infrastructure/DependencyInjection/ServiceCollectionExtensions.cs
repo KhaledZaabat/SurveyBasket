@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Persistence.Interceptors;
-using SurveyBasket.Services;
+using SurveyBasket.Services.Emails;
 using SurveyBasket.Settings;
 using System.Text;
 
@@ -14,7 +15,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IEmailSender, EmailService>();
 
         services
            .AddControllersConfiguration()
@@ -25,8 +25,11 @@ public static class ServiceCollectionExtensions
            .AddJwtConfiguration(configuration)
            .ConfigureMappings()
            .ConfigureProblems()
-           .ConfigureCaching(configuration);
-        services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
+           .ConfigureCaching(configuration)
+           .ConfigureMail(configuration)
+           .RegisterNotifications()
+           .ConfigureBackGroundJobs(configuration);
+
         return services;
     }
 
@@ -65,6 +68,8 @@ public static class ServiceCollectionExtensions
     // ------------------ SCANNING ------------------
     private static IServiceCollection AddAssemblyScanningConfiguration(this IServiceCollection services)
     {
+
+
         services.Scan(scan => scan
             .FromAssembliesOf(typeof(IScopedService))
             .AddClasses(c => c.AssignableTo<IScopedService>()).AsImplementedInterfaces().WithScopedLifetime()
@@ -172,6 +177,29 @@ public static class ServiceCollectionExtensions
             };
         });
 
+        return services;
+    }
+    private static IServiceCollection ConfigureMail(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
+        return services;
+    }
+
+    private static IServiceCollection ConfigureBackGroundJobs(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddHangfire(Hangfireconfiguration => Hangfireconfiguration
+         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+         .UseSimpleAssemblyNameTypeSerializer()
+         .UseRecommendedSerializerSettings()
+         .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+        // Add the processing server as IHostedService
+        services.AddHangfireServer();
+        return services;
+    }
+    private static IServiceCollection RegisterNotifications(this IServiceCollection services)
+    {
+        services.AddScoped<IEmailSender, EmailService>();
         return services;
     }
 }

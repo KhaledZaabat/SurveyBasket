@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.Auhtentication_Providers;
@@ -227,7 +228,7 @@ namespace SurveyBasket.Services.Authentication
             return Result.Success();
         }
 
-        private async Task SendConfirmationEmail(string code, string confirmationEmail, ApplicationUser user)
+        private Task SendConfirmationEmail(string code, string confirmationEmail, ApplicationUser user)
         {
             var confirmationLink = $"https://your-frontend.com/confirm-email?userId={user.Id}&code={code}";
 
@@ -237,10 +238,11 @@ namespace SurveyBasket.Services.Authentication
                 { "{{confirmation_link}}", confirmationLink }
             };
 
-            await emailService.SendEmailAsync(
+            BackgroundJob.Enqueue(() => emailService.SendEmailAsync(
                 confirmationEmail,
                 "Confirm your SurveyBasket account",
-                EmailBodyBuilder.GenerateEmailBody("EmailConfirmation", templateVariables));
+                HtmlBodyBuilder.GenerateEmailBody("EmailConfirmation", templateVariables)));
+            return Task.CompletedTask;
         }
     }
 }

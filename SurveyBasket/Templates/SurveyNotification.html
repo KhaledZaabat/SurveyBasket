@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    <title>New Survey Invitation</title>
+
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f5f7;
+            font-family: "Inter", Arial, sans-serif;
+            color: #333;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .email-wrapper {
+            width: 100%;
+            background-color: #f4f5f7;
+            padding: 30px 0;
+        }
+
+        .email-content {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .email-header {
+            text-align: center;
+            padding: 30px 0 10px;
+            background-color: #2a6ef0;
+        }
+
+            .email-header h1 {
+                color: #ffffff;
+                font-size: 24px;
+                margin: 0;
+            }
+
+        .email-body {
+            padding: 40px;
+        }
+
+            .email-body h2 {
+                color: #2a2a2a;
+                font-size: 20px;
+                margin-top: 0;
+            }
+
+            .email-body p {
+                font-size: 15px;
+                color: #555;
+                line-height: 1.6;
+                margin: 12px 0;
+            }
+
+        .button {
+            display: inline-block;
+            background-color: #2a6ef0;
+            color: #fff !important;
+            padding: 12px 28px;
+            font-size: 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 24px 0;
+            transition: background 0.2s ease;
+        }
+
+            .button:hover {
+                background-color: #225bd1;
+            }
+
+        .divider {
+            border-top: 1px solid #eee;
+            margin: 30px 0;
+        }
+
+        .email-footer {
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            padding: 20px;
+        }
+
+            .email-footer p {
+                margin: 4px 0;
+            }
+
+        @media (max-width: 600px) {
+            .email-body {
+                padding: 24px;
+            }
+
+            .button {
+                display: block;
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1e1e1e;
+                color: #ddd;
+            }
+
+            .email-content {
+                background-color: #2a2a2a;
+                color: #fff;
+            }
+
+            .email-footer {
+                color: #aaa;
+            }
+
+            .divider {
+                border-top-color: #444;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-wrapper">
+        <table role="presentation" class="email-content">
+            <tr>
+                <td class="email-header">
+                    <h1>Survey Basket</h1>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="email-body">
+                    <h2>Hi {{name}}, 👋</h2>
+                    <p>
+                        We have a new survey for you: <b>{{surveyTitle}}</b>.
+                        We'd love to hear your opinion!
+                    </p>
+
+                    <p>
+                        Please take a moment to participate before
+                        <b>{{endDate}}</b>.
+                    </p>
+
+                    <p style="text-align: center">
+                        <a href="{{url}}" target="_blank" class="button">Start Survey</a>
+                    </p>
+
+                    <div class="divider"></div>
+
+                    <p>
+                        Thank you for helping us improve with your valuable feedback.
+                    </p>
+
+                    <p>— The Survey Basket Team</p>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="email-footer">
+                    <p>Survey Basket</p>
+                    <p>1234 Street Rd., Cairo, Egypt</p>
+                    <p>
+                        <a href="https://surveybasket.com" style="color: #2a6ef0">surveybasket.com</a>
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

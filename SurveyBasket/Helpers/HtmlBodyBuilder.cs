@@ -1,6 +1,6 @@
 namespace SurveyBasket.Helpers;
 
-public static class EmailBodyBuilder
+public static class HtmlBodyBuilder
 {
     public static string GenerateEmailBody(string template, Dictionary<string, string> templateModel)
     {

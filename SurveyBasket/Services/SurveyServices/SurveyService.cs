@@ -1,6 +1,10 @@
-﻿namespace SurveyBasket.Services.SurveyServices;
+﻿using Hangfire;
+using SurveyBasket.Services.Notifications;
 
-public class SurveyService(ISurveyRepository surveyRepository, ILogger<SurveyService> logger) : ISurveyService
+namespace SurveyBasket.Services.SurveyServices;
+
+public class SurveyService(ISurveyRepository surveyRepository,
+    ILogger<SurveyService> logger) : ISurveyService
 {
     public async Task<Result<ICollection<SurveyResponse>>> GetAllAsync(CancellationToken token = default)
     {
@@ -41,7 +45,8 @@ public class SurveyService(ISurveyRepository surveyRepository, ILogger<SurveySer
 
         var survey = request.Adapt<Survey>();
         var addedSurvey = await surveyRepository.AddAsync(survey, token);
-
+        if (addedSurvey!.Status.IsPublished && addedSurvey.StartsAt == DateOnly.FromDateTime(DateTime.UtcNow))
+            BackgroundJob.Enqueue<INotificationService>(service => service.SendNewPollsNotification(addedSurvey.Id));
         logger.LogInformation("Survey '{Title}' created successfully with ID {SurveyId}", survey.Title, addedSurvey.Id);
         return Result.Success(addedSurvey.Adapt<SurveyResponse>());
     }
@@ -68,6 +73,8 @@ public class SurveyService(ISurveyRepository surveyRepository, ILogger<SurveySer
         survey.EndsAt = request.EndsAt;
 
         await surveyRepository.UpdateAsync(survey, token);
+        if (survey!.Status.IsPublished && survey.StartsAt == DateOnly.FromDateTime(DateTime.UtcNow))
+            BackgroundJob.Enqueue<INotificationService>(service => service.SendNewPollsNotification(survey.Id));
         logger.LogInformation("Survey ID {SurveyId} updated successfully", id);
         return Result.Success();
     }
@@ -99,6 +106,8 @@ public class SurveyService(ISurveyRepository surveyRepository, ILogger<SurveySer
 
         survey.Status = new PublishStatus(!survey.Status.IsPublished);
         await surveyRepository.UpdateAsync(survey, token);
+        if (survey!.Status.IsPublished && survey.StartsAt == DateOnly.FromDateTime(DateTime.UtcNow))
+            BackgroundJob.Enqueue<INotificationService>(service => service.SendNewPollsNotification(survey.Id));
         logger.LogInformation("Survey ID {SurveyId} publish status changed to {Status}", id, survey.Status.IsPublished);
         return Result.Success();
     }
@@ -131,7 +140,8 @@ public class SurveyService(ISurveyRepository surveyRepository, ILogger<SurveySer
         survey.DeletedOn = null;
         survey.DeletedById = null;
         await surveyRepository.UpdateAsync(survey, token);
-
+        if (survey!.Status.IsPublished && survey.StartsAt == DateOnly.FromDateTime(DateTime.UtcNow))
+            BackgroundJob.Enqueue<INotificationService>(service => service.SendNewPollsNotification(survey.Id));
         logger.LogInformation("Survey ID {SurveyId} restored successfully", surveyId);
         return Result.Success();
     }

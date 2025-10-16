@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using SurveyBasket.Settings;
 
-namespace SurveyBasket.Services;
+namespace SurveyBasket.Services.Emails;
 
 public class EmailService(IOptions<MailSettings> mailSettings, ILogger<EmailService> logger) : IEmailSender
 {
@@ -30,13 +30,13 @@ public class EmailService(IOptions<MailSettings> mailSettings, ILogger<EmailServ
 
         _logger.LogInformation("Sending email to {email}", email);
 
-        // Connect to Mailtrap SMTP sandbox
+
         await smtp.ConnectAsync(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
 
-        // Authenticate using Mailtrap SMTP credentials
+
         await smtp.AuthenticateAsync(_mailSettings.Username, _mailSettings.Password);
 
-        // Send the email
+
         await smtp.SendAsync(message);
 
         await smtp.DisconnectAsync(true);
