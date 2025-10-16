@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.Auhtentication_Providers;
 using SurveyBasket.Shared.Errors;
@@ -11,7 +12,8 @@ namespace SurveyBasket.Services.Authentication
         IJwtProvider jwtProvider,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        ILogger<AuthService> logger) : IAuthService
+        ILogger<AuthService> logger,
+        IEmailSender emailService) : IAuthService
     {
         private const int RefreshTokenLifetimeDays = 14;
 
@@ -140,6 +142,8 @@ namespace SurveyBasket.Services.Authentication
             var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
+            await SendConfirmationEmail(code, request.Email, user);
+
             logger.LogInformation("User {Email} registered successfully. Confirmation code generated.", request.Email);
 
             return Result.Success();
@@ -216,9 +220,27 @@ namespace SurveyBasket.Services.Authentication
             var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
+            await SendConfirmationEmail(code, request.Email, user);
+
             logger.LogInformation("Confirmation email re-sent to {Email}", request.Email);
 
             return Result.Success();
+        }
+
+        private async Task SendConfirmationEmail(string code, string confirmationEmail, ApplicationUser user)
+        {
+            var confirmationLink = $"https://your-frontend.com/confirm-email?userId={user.Id}&code={code}";
+
+            var templateVariables = new Dictionary<string, string>
+            {
+                { "{{username}}", $"{user.FirstName} {user.LastName}" },
+                { "{{confirmation_link}}", confirmationLink }
+            };
+
+            await emailService.SendEmailAsync(
+                confirmationEmail,
+                "Confirm your SurveyBasket account",
+                EmailBodyBuilder.GenerateEmailBody("EmailConfirmation", templateVariables));
         }
     }
 }

@@ -41,4 +41,11 @@ public class AuthController(IAuthService _service) : ControllerBase
     CancellationToken cancellationToken)
     => (await _service.ResendConfirmationEmailAsync(request, cancellationToken))
         .ToActionResult(context: HttpContext);
+
+
+
+
+
 }
+
+

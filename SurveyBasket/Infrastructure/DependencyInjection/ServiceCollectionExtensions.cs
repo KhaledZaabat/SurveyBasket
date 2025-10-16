@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Persistence.Interceptors;
+using SurveyBasket.Services;
+using SurveyBasket.Settings;
 using System.Text;
 
 namespace SurveyBasket.Infrastructure.DependencyInjection;
@@ -11,6 +14,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<IEmailSender, EmailService>();
+
         services
            .AddControllersConfiguration()
            .AddValidationConfiguration()
@@ -21,6 +26,7 @@ public static class ServiceCollectionExtensions
            .ConfigureMappings()
            .ConfigureProblems()
            .ConfigureCaching(configuration);
+        services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
         return services;
     }
 

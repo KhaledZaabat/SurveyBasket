@@ -7,11 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationServices(builder.Configuration);
 //After Here you Can Override
+builder.Services.AddHttpClient();
+
+
 
 builder.Host.UseSerilog
     ((context, configuration) =>
     configuration.ReadFrom.Configuration(builder.Configuration));
-
 
 
 var app = builder.Build();
@@ -28,5 +30,3 @@ app.UseSerilogRequestLogging();
 app.MapControllers();
 
 app.Run();
-
-
