@@ -1,4 +1,4 @@
-﻿namespace SurveyBasket.Contracts.Users.Requests;
+﻿namespace SurveyBasket.Contracts.Authentication.Requests;
 
 public record ChangePasswordRequest(
     string CurrentPassword,

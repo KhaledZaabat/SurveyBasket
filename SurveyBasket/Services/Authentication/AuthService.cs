@@ -167,7 +167,7 @@ namespace SurveyBasket.Services.Authentication
             if (user is null)
             {
                 logger.LogWarning("Email confirmation failed: invalid user ID {UserId}", request.userId);
-                return Result.Failure(UserError.InvalidId());
+                return Result.Success();
             }
 
             if (user.EmailConfirmed)
@@ -209,7 +209,7 @@ namespace SurveyBasket.Services.Authentication
             if (user is null)
             {
                 logger.LogWarning("Resend failed: no user found with email {Email}", request.Email);
-                return Result.Failure(UserError.InvalidCredentials("No account found with this email."));
+                return Result.Success();
             }
 
             if (user.EmailConfirmed)
@@ -230,7 +230,7 @@ namespace SurveyBasket.Services.Authentication
 
         private Task SendConfirmationEmail(string code, string confirmationEmail, ApplicationUser user)
         {
-            var confirmationLink = $"https://your-frontend.com/confirm-email?userId={user.Id}&code={code}";
+            var confirmationLink = $"https://frontend.com/confirm-email?userId={user.Id}&code={code}";
 
             var templateVariables = new Dictionary<string, string>
             {
@@ -244,5 +244,67 @@ namespace SurveyBasket.Services.Authentication
                 HtmlBodyBuilder.GenerateEmailBody("EmailConfirmation", templateVariables)));
             return Task.CompletedTask;
         }
+
+
+        public async Task<Result> ChangePasswordAsync(string userId, ChangePasswordRequest request)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+
+            var result = await userManager.ChangePasswordAsync(user!, request.CurrentPassword, request.NewPassword);
+
+            if (result.Succeeded)
+                return Result.Success();
+
+            var errors = result.Errors;
+            if (result.Errors.Any(e => e.Code.Contains("PasswordMismatch")))
+                return Result.Failure(UserError.InvalidCredentials("Current password is incorrect"));
+
+            if (result.Errors.Any(e => e.Code.Contains("PasswordTooShort") || e.Code.Contains("PasswordRequires")))
+                return Result.Failure(UserError.InvalidSubmission("New password does not meet requirements"));
+
+
+            return Result.Failure(UserError.InvalidSubmission("Failed to change password"));
+
+
+        }
+
+        public async Task<Result> SendForgetPasswordAsync(ForgetPasswordRequest request, CancellationToken cancellationToken)
+        {
+            var user = await userManager.FindByEmailAsync(request.Email);
+            if (user is null)
+                return Result.Success();
+
+
+            var code = await userManager.GeneratePasswordResetTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+
+            await SendResetPasswordEmail(code, user);
+
+            return Result.Success();
+        }
+
+        private Task SendResetPasswordEmail(string code, ApplicationUser user)
+        {
+
+            var resetLink = $"https://frontend.com/reset-password?Email={user.Email}&code={code}";
+
+
+            var templateVariables = new Dictionary<string, string>
+    {
+        { "{{username}}", $"{user.FirstName} {user.LastName}" },
+        { "{{reset_link}}", resetLink }
+    };
+
+
+            BackgroundJob.Enqueue(() => emailService.SendEmailAsync(
+                user.Email!,
+                "Reset your SurveyBasket password",
+                HtmlBodyBuilder.GenerateEmailBody("ForgetPassword", templateVariables)
+            ));
+
+            return Task.CompletedTask;
+        }
+
     }
 }

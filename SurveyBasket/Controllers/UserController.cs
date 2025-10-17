@@ -1,10 +1,11 @@
-﻿
+﻿using SurveyBasket.Services.Authentication;
+
 namespace SurveyBasket.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class UserController(IUserService userService) : ControllerBase
+    public class UserController(IUserService userService, IAuthService authService) : ControllerBase
     {
 
 
@@ -35,7 +36,7 @@ namespace SurveyBasket.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User ID not found in token.");
 
-            return (await userService.ChangePasswordAsync(userId, request)).ToActionResult();
+            return (await authService.ChangePasswordAsync(userId, request)).ToActionResult();
 
         }
 

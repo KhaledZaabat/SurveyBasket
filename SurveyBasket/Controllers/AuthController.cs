@@ -43,7 +43,13 @@ public class AuthController(IAuthService _service) : ControllerBase
         .ToActionResult(context: HttpContext);
 
 
-
+    // POST: /auth/forgot-password
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(
+        [FromBody] ForgetPasswordRequest request,
+        CancellationToken cancellationToken)
+        => (await _service.SendForgetPasswordAsync(request, cancellationToken))
+            .ToActionResult(context: HttpContext);
 
 
 }

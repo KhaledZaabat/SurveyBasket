@@ -1,3 +1,3 @@
-﻿namespace SurveyBasket.Contracts.Users.Requests;
+﻿namespace SurveyBasket.Contracts.Authentication.Requests;
 
 public record UpdateUserProfileRequest(string FirstName, string LastName);
