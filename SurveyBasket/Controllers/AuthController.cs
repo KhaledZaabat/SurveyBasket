@@ -52,6 +52,11 @@ public class AuthController(IAuthService _service) : ControllerBase
             .ToActionResult(context: HttpContext);
 
 
-}
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(
+       [FromBody] ResetPasswordRequest request, CancellationToken cancellationToken)
+       => (await _service.ResetPasswordAsync(request, cancellationToken))
+           .ToActionResult(context: HttpContext);
 
+}
 

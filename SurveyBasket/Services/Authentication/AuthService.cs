@@ -200,7 +200,7 @@ namespace SurveyBasket.Services.Authentication
         }
 
         public async Task<Result> ResendConfirmationEmailAsync(
-            ResendConfirmationEmailRequest request,
+            Contracts.Authentication.Requests.ResendConfirmationEmailRequest request,
             CancellationToken cancellationToken)
         {
             logger.LogInformation("Resending confirmation email to {Email}", request.Email);
@@ -228,22 +228,6 @@ namespace SurveyBasket.Services.Authentication
             return Result.Success();
         }
 
-        private Task SendConfirmationEmail(string code, string confirmationEmail, ApplicationUser user)
-        {
-            var confirmationLink = $"https://frontend.com/confirm-email?userId={user.Id}&code={code}";
-
-            var templateVariables = new Dictionary<string, string>
-            {
-                { "{{username}}", $"{user.FirstName} {user.LastName}" },
-                { "{{confirmation_link}}", confirmationLink }
-            };
-
-            BackgroundJob.Enqueue(() => emailService.SendEmailAsync(
-                confirmationEmail,
-                "Confirm your SurveyBasket account",
-                HtmlBodyBuilder.GenerateEmailBody("EmailConfirmation", templateVariables)));
-            return Task.CompletedTask;
-        }
 
 
         public async Task<Result> ChangePasswordAsync(string userId, ChangePasswordRequest request)
@@ -267,6 +251,40 @@ namespace SurveyBasket.Services.Authentication
 
 
         }
+        public async Task<Result> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken)
+        {
+            var user = await userManager.FindByEmailAsync(request.Email);
+            if (user is null || !user.EmailConfirmed)
+                return Result.Failure(UserError.InvalidCode());
+
+
+            var passwordCheck = await userManager.CheckPasswordAsync(user, request.NewPassword);
+            if (passwordCheck)
+                return Result.Failure(UserError.InvalidSubmission("New password cannot be the same as the current password"));
+
+
+            string code;
+            try
+            {
+                code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Code));
+            }
+            catch (FormatException)
+            {
+                return Result.Failure(UserError.InvalidCode("Invalid or expired reset token"));
+            }
+
+
+            var result = await userManager.ResetPasswordAsync(user, code, request.NewPassword);
+            if (!result.Succeeded)
+            {
+                if (result.Errors.Any(e => e.Code.Contains("PasswordTooShort") || e.Code.Contains("PasswordRequires")))
+                    return Result.Failure(UserError.InvalidSubmission("New password does not meet requirements"));
+
+                return Result.Failure(UserError.InvalidSubmission("Failed to reset password"));
+            }
+
+            return Result.Success();
+        }
 
         public async Task<Result> SendForgetPasswordAsync(ForgetPasswordRequest request, CancellationToken cancellationToken)
         {
@@ -274,7 +292,8 @@ namespace SurveyBasket.Services.Authentication
             if (user is null)
                 return Result.Success();
 
-
+            if (!user.EmailConfirmed)
+                return Result.Failure(UserError.EmailNotConfirmed());
             var code = await userManager.GeneratePasswordResetTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
@@ -283,6 +302,24 @@ namespace SurveyBasket.Services.Authentication
 
             return Result.Success();
         }
+
+        private Task SendConfirmationEmail(string code, string confirmationEmail, ApplicationUser user)
+        {
+            var confirmationLink = $"https://frontend.com/confirm-email?userId={user.Id}&code={code}";
+
+            var templateVariables = new Dictionary<string, string>
+            {
+                { "{{username}}", $"{user.FirstName} {user.LastName}" },
+                { "{{confirmation_link}}", confirmationLink }
+            };
+
+            BackgroundJob.Enqueue(() => emailService.SendEmailAsync(
+                confirmationEmail,
+                "Confirm your SurveyBasket account",
+                HtmlBodyBuilder.GenerateEmailBody("EmailConfirmation", templateVariables)));
+            return Task.CompletedTask;
+        }
+
 
         private Task SendResetPasswordEmail(string code, ApplicationUser user)
         {

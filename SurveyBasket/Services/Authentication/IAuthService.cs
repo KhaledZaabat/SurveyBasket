@@ -9,5 +9,6 @@ public interface IAuthService : IScopedService
     public Task<Result> ResendConfirmationEmailAsync(ResendConfirmationEmailRequest request, CancellationToken cancellationToken);
     public Task<Result> ChangePasswordAsync(string userId, ChangePasswordRequest request);
     public Task<Result> SendForgetPasswordAsync(ForgetPasswordRequest request, CancellationToken cancellationToken);
+    public Task<Result> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken);
 
 }

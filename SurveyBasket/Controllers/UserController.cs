@@ -1,4 +1,5 @@
-﻿using SurveyBasket.Services.Authentication;
+﻿
+using SurveyBasket.Services.Authentication;
 
 namespace SurveyBasket.Controllers
 {
