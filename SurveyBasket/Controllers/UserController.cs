@@ -24,21 +24,19 @@ namespace SurveyBasket.Controllers
             return result.ToActionResult<UserProfileResponse>(HttpContext);
         }
 
-        [HttpPatch("profile")]
-        public async Task<IActionResult> PatchUserProfile(
-            [FromBody] JsonPatchDocument<UpdateUserProfileRequest> patchDoc,
+        // POST: api/user/change-password
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword(
+            [FromBody] ChangePasswordRequest request,
             CancellationToken cancellationToken)
         {
-            if (patchDoc is null)
-                return BadRequest("Invalid patch document.");
 
             var userId = User.GetUserId();
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User ID not found in token.");
 
-            await userService.PatchUserProfile(userId, patchDoc, cancellationToken);
+            return (await userService.ChangePasswordAsync(userId, request)).ToActionResult();
 
-            return NoContent();
         }
 
     }
