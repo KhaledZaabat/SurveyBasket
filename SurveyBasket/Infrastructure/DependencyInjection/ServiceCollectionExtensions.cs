@@ -8,7 +8,6 @@ using SurveyBasket.Persistence.Interceptors;
 using SurveyBasket.Services.Emails;
 using SurveyBasket.Settings;
 using System.Text;
-
 namespace SurveyBasket.Infrastructure.DependencyInjection;
 
 public static class ServiceCollectionExtensions
@@ -28,7 +27,9 @@ public static class ServiceCollectionExtensions
            .ConfigureCaching(configuration)
            .ConfigureMail(configuration)
            .RegisterNotifications()
-           .ConfigureBackGroundJobs(configuration);
+           .ConfigureBackGroundJobs(configuration)
+         ;
+
 
         return services;
     }
@@ -36,7 +37,7 @@ public static class ServiceCollectionExtensions
     // ------------------ CONTROLLERS ------------------
     private static IServiceCollection AddControllersConfiguration(this IServiceCollection services)
     {
-        services.AddControllers();
+        services.AddControllers().AddNewtonsoftJson();
         return services;
     }
 
