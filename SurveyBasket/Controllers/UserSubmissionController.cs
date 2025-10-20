@@ -1,11 +1,12 @@
-﻿using SurveyBasket.Services.SurveyQuestions;
+﻿using SurveyBasket.Consts;
+using SurveyBasket.Services.SurveyQuestions;
 using SurveyBasket.Services.UserSubmissionServices;
 
 namespace SurveyBasket.Controllers
 {
     [Route("api/Surveys/{surveyId}/Submissions")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = DefaultRoles.Member)]
     public class UserSubmissionController(ISurveyQuestionService questionService, IUserSubmissionService submissionService) : ControllerBase
     {
 

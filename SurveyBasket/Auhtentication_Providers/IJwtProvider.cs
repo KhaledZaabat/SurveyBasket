@@ -1,10 +1,8 @@
-﻿using SurveyBasket.Domain.Entities;
-
-namespace SurveyBasket.Auhtentication_Providers
+﻿namespace SurveyBasket.Auhtentication_Providers
 {
     public interface IJwtProvider : ISingletonService
     {
-        public TokenResponse GenerateToken(ApplicationUser user);
+        public TokenResponse GenerateToken(GenerateTokenRequest request);
         public string? ValidateToken(string token);
     }
 }

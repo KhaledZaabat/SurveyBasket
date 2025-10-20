@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SurveyBasket.Consts;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -9,8 +10,9 @@ namespace SurveyBasket.Auhtentication_Providers;
 public class JwtProvider(IOptions<JwtSettings> jwtOptions) : IJwtProvider
 {
 
-    TokenResponse IJwtProvider.GenerateToken(ApplicationUser user)
+    TokenResponse IJwtProvider.GenerateToken(GenerateTokenRequest request)
     {
+        ApplicationUser user = request.user;
         JwtSettings _jwtSettings = jwtOptions.Value;
         var issuedAt = DateTime.UtcNow;
         var expiresAt = issuedAt.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
@@ -25,10 +27,12 @@ public class JwtProvider(IOptions<JwtSettings> jwtOptions) : IJwtProvider
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        // AddAsync user roles as claims
-        //var roles = await _userManager.GetRolesAsync(user);
-        //claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+        foreach (string role in request.roles)
+            claims.Add(new Claim(ClaimTypes.Role, role));
 
+
+        foreach (string per in request.permissions)
+            claims.Add(new Claim(Permissions.Type, per));
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

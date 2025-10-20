@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.IdentityModel.Tokens;
+using SurveyBasket.Auhtentication_Providers.Filters;
 using SurveyBasket.Persistence.Interceptors;
 using SurveyBasket.Services.Emails;
 using SurveyBasket.Settings;
@@ -28,7 +29,8 @@ public static class ServiceCollectionExtensions
            .ConfigureMail(configuration)
            .RegisterNotifications()
            .ConfigureBackGroundJobs(configuration)
-         ;
+           .AddAuthorizationConfiguration();
+        ;
 
 
         return services;
@@ -84,22 +86,23 @@ public static class ServiceCollectionExtensions
     // ------------------ IDENTITY ------------------
     private static IServiceCollection AddIdentityConfiguration(this IServiceCollection services)
     {
-        services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+        services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
         {
-            // Password requirements
+
             options.Password.RequireDigit = true;
             options.Password.RequiredLength = 8;
             options.Password.RequireNonAlphanumeric = true;
             options.Password.RequireUppercase = true;
             options.Password.RequireLowercase = true;
+
             options.SignIn.RequireConfirmedEmail = true;
             options.User.RequireUniqueEmail = true;
-            // Lockout
+
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
             options.Lockout.MaxFailedAccessAttempts = 5;
             options.Lockout.AllowedForNewUsers = true;
 
-            // User settings
+
             options.User.RequireUniqueEmail = true;
         })
         .AddEntityFrameworkStores<AppDbContext>()
@@ -201,6 +204,14 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection RegisterNotifications(this IServiceCollection services)
     {
         services.AddScoped<IEmailSender, EmailService>();
+        return services;
+    }
+    // ------------------ AUTHORIZATION ------------------
+    private static IServiceCollection AddAuthorizationConfiguration(this IServiceCollection services)
+    {
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+        services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+
         return services;
     }
 }

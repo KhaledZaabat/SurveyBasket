@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.Auhtentication_Providers;
+using SurveyBasket.Consts;
 using SurveyBasket.Shared.Errors;
 using System.Security.Cryptography;
 using System.Text;
@@ -13,6 +14,7 @@ namespace SurveyBasket.Services.Authentication
         IJwtProvider jwtProvider,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
+        RoleManager<ApplicationRole> roleManager,
         ILogger<AuthService> logger,
         IEmailSender emailService) : IAuthService
     {
@@ -41,8 +43,8 @@ namespace SurveyBasket.Services.Authentication
                 logger.LogWarning("Login failed: invalid credentials for email {Email}", request.Email);
                 return Result.Failure<AuthResponse>(UserError.InvalidCredentials());
             }
-
-            var jwtToken = jwtProvider.GenerateToken(user);
+            GenerateTokenRequest generateTokenRequest = await GetTokenRequest(user);
+            var jwtToken = jwtProvider.GenerateToken(generateTokenRequest);
             var refreshToken = GenerateRefreshToken();
 
             user.RefreshTokens.Add(new RefreshToken
@@ -93,8 +95,8 @@ namespace SurveyBasket.Services.Authentication
             }
 
             oldToken.RevokedOn = DateTime.UtcNow;
-
-            var newJwtToken = jwtProvider.GenerateToken(user);
+            GenerateTokenRequest generateTokenRequest = await GetTokenRequest(user);
+            var newJwtToken = jwtProvider.GenerateToken(generateTokenRequest);
             var newRefreshToken = GenerateRefreshToken();
 
             user.RefreshTokens.Add(new RefreshToken
@@ -143,6 +145,9 @@ namespace SurveyBasket.Services.Authentication
             var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
+
+            await userManager.AddToRoleAsync(user, DefaultRoles.Member);
+
             await SendConfirmationEmail(code, request.Email, user);
 
             logger.LogInformation("User {Email} registered successfully. Confirmation code generated.", request.Email);
@@ -150,14 +155,7 @@ namespace SurveyBasket.Services.Authentication
             return Result.Success();
         }
 
-        private static TokenResponse GenerateRefreshToken()
-        {
-            string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-            return new TokenResponse(
-                Token: token,
-                ExpiresAt: DateTime.UtcNow.AddDays(RefreshTokenLifetimeDays)
-            );
-        }
+
 
         public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request, CancellationToken cancellationToken)
         {
@@ -286,6 +284,53 @@ namespace SurveyBasket.Services.Authentication
             return Result.Success();
         }
 
+
+        private async Task<IList<string>> GetAllRoles(ApplicationUser user)
+        {
+
+            return await userManager.GetRolesAsync(user);
+        }
+
+        private async Task<IList<string>> GetAllPermissionsAsync(ApplicationUser user, IList<string> roles)
+        {
+            var permissions = new HashSet<string>();
+
+
+
+            foreach (var roleName in roles)
+            {
+                var role = await roleManager.FindByNameAsync(roleName);
+                if (role == null) continue;
+
+                var claims = await roleManager.GetClaimsAsync(role);
+
+                foreach (var claim in claims)
+                {
+                    if (claim.Type == Permissions.Type && !string.IsNullOrEmpty(claim.Value))
+                    {
+                        permissions.Add(claim.Value);
+                    }
+                }
+            }
+
+            return permissions.ToList();
+        }
+        private async Task<GenerateTokenRequest> GetTokenRequest(ApplicationUser user)
+        {
+            IList<string> roles = await GetAllRoles(user);
+            IList<string> permissions = await GetAllPermissionsAsync(user, roles);
+            GenerateTokenRequest generateTokenRequest = new GenerateTokenRequest(user, roles, permissions);
+
+            return generateTokenRequest;
+        }
+        private static TokenResponse GenerateRefreshToken()
+        {
+            string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+            return new TokenResponse(
+                Token: token,
+                ExpiresAt: DateTime.UtcNow.AddDays(RefreshTokenLifetimeDays)
+            );
+        }
         public async Task<Result> SendForgetPasswordAsync(ForgetPasswordRequest request, CancellationToken cancellationToken)
         {
             var user = await userManager.FindByEmailAsync(request.Email);

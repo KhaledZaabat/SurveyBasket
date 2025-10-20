@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using SurveyBasket.Helpers;
+﻿using SurveyBasket.Auhtentication_Providers.Filters;
+using SurveyBasket.Consts;
 
 namespace SurveyBasket.Controllers;
 
@@ -9,32 +9,34 @@ namespace SurveyBasket.Controllers;
 public class SurveysController(ISurveyService _surveyService) : ControllerBase
 {
     [HttpGet]
+    [HasPermission(Permissions.Surveys.Read)]
     public async Task<ActionResult<ICollection<SurveyResponse>>> GetAll(CancellationToken token = default)
-        => (await _surveyService.GetAllAsync(token)).ToActionResult(context: HttpContext);
+      => (await _surveyService.GetAllAsync(token)).ToActionResult(context: HttpContext);
 
     [HttpGet("admin/all")]
-    // [Authorize(Roles = "Admin")] later
+    [Authorize(Roles = DefaultRoles.Admin)]
+    [HasPermission(Permissions.Surveys.Read)]
     public async Task<ActionResult<ICollection<SurveyResponse>>> GetAllIncludingDeleted(CancellationToken token = default)
-         => (await _surveyService.GetAllIncludingDeletedAsync(token))
-             .ToActionResult(context: HttpContext);
+    => (await _surveyService.GetAllIncludingDeletedAsync(token))
+        .ToActionResult(context: HttpContext);
 
     [HttpGet("{id:int}")]
+    [HasPermission(Permissions.Surveys.Read)]
     public async Task<ActionResult<SurveyResponse>> GetById([FromRoute] int id, CancellationToken token = default)
         => (await _surveyService.GetByIdAsync(id, token)).ToActionResult(context: HttpContext);
 
     [HttpPost]
+    [HasPermission(Permissions.Surveys.Add)]
     public async Task<ActionResult<SurveyResponse>> Add([FromBody] CreateSurveyRequest request, CancellationToken token = default)
     {
         Result<SurveyResponse> result = await _surveyService.AddAsync(request, token);
         if (result is SuccessResult<SurveyResponse> success)
             return CreatedAtAction(nameof(GetById), new { id = success.Value.Id }, success.Value);
-
-
-
         return result.ToActionResult(context: HttpContext);
     }
 
     [HttpPut("{id:int}")]
+    [HasPermission(Permissions.Surveys.Update)]
     public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateSurveyRequest request, CancellationToken token = default)
     {
         Result result = await _surveyService.UpdateAsync(id, request, token);
@@ -44,6 +46,7 @@ public class SurveysController(ISurveyService _surveyService) : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [HasPermission(Permissions.Surveys.Delete)]
     public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken token = default)
     {
         Result result = await _surveyService.DeleteAsync(id, token);
@@ -53,6 +56,7 @@ public class SurveysController(ISurveyService _surveyService) : ControllerBase
     }
 
     [HttpPatch("{id:int}/toggle-publish")]
+    [HasPermission(Permissions.Surveys.Update)]
     public async Task<IActionResult> TogglePublish([FromRoute] int id, CancellationToken cancellationToken = default)
     {
         Result result = await _surveyService.TogglePublishAsync(id, cancellationToken);
@@ -62,17 +66,18 @@ public class SurveysController(ISurveyService _surveyService) : ControllerBase
     }
 
     [HttpGet("current")]
+    [HasPermission(Permissions.Surveys.Read)]
     public async Task<ActionResult<ICollection<SurveyResponse>>> GetCurrentSurveys(CancellationToken token = default)
     => (await _surveyService.GetCurrentSurveysAsync(token))
         .ToActionResult(context: HttpContext);
 
     [HttpPatch("{surveyId}/restore")]
+    [HasPermission(Permissions.Surveys.Update)]
     public async Task<IActionResult> RestoreSurveyQuestion([FromRoute] int surveyId,
         CancellationToken token = default)
     {
         Result result = await _surveyService.RestoreSurveyAsync(surveyId, token);
         if (result is SuccessResult) return NoContent();
         return result.ToActionResult(HttpContext);
-
     }
 }
