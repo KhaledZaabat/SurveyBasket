@@ -15,7 +15,10 @@
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_Surveys_Users_CreatedById");
-
+        builder.Property(x => x.CreatedOn).HasColumnType("timestamp with time zone");
+        builder.Property(x => x.UpdatedOn).HasColumnType("timestamp with time zone");
+        builder.Property(x => x.DeletedOn).HasColumnType("timestamp with time zone");
+        builder.Property(x => x.CreatedOn).HasColumnType("timestamp with time zone");
         builder.HasOne(p => p.UpdatedBy)
             .WithMany()
             .HasForeignKey(p => p.UpdatedById)

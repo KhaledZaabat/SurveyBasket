@@ -13,7 +13,6 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
             tokens.WithOwner().HasForeignKey("UserId");
             tokens.HasKey(t => t.Id);
 
-
         });
 
 

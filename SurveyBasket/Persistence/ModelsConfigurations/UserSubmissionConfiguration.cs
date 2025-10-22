@@ -13,6 +13,7 @@
             .OnDelete(DeleteBehavior.NoAction)
             .HasConstraintName("FK_UserSubmissions_Surveys_SurveyId");
 
+        builder.Property(x => x.DeletedOn).HasColumnType("timestamp with time zone");
 
         builder.HasOne(s => s.User)
             .WithMany(u => u.UserSubmissions)
@@ -26,7 +27,7 @@
 
         builder.Property(s => s.SubmittedOn)
             .IsRequired()
-            .HasColumnType("datetime2");
+            .HasColumnType("timestamp with time zone");
         builder.ToTable("UserSubmissions", tb =>
         {
             tb.HasTrigger("trg_UserSubmission_CascadeSoftDelete");

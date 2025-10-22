@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -58,10 +59,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<AuditAbleInterceptor>();
         services.AddSingleton<SoftDeleteInterceptor>();
 
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = configuration.GetConnectionString("PostgreSql");
         services.AddDbContext<AppDbContext>((sp, options) =>
     options
-        .UseSqlServer(connectionString)
+    .UseNpgsql(connectionString)
 
         .AddInterceptors(sp.GetRequiredService<AuditAbleInterceptor>(), sp.GetRequiredService<SoftDeleteInterceptor>())
 );
@@ -195,7 +196,7 @@ public static class ServiceCollectionExtensions
          .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
          .UseSimpleAssemblyNameTypeSerializer()
          .UseRecommendedSerializerSettings()
-         .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+         .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(configuration.GetConnectionString("HangfireConnection"))));
 
         // Add the processing server as IHostedService
         services.AddHangfireServer();

@@ -14,7 +14,7 @@
             .HasConstraintName("FK_SubmissionDetails_UserSubmissions_UserSubmissionId");
 
 
-
+        builder.Property(x => x.DeletedOn).HasColumnType("timestamp with time zone");
         builder.HasOne(d => d.Option)
             .WithMany()
             .HasForeignKey(d => d.OptionId)
