@@ -1,28 +1,36 @@
+﻿
 
-set -e
+#set -e
 
-echo "Waiting for SQL Server to start..."
-sleep 15
+#echo "Waiting for SQL Server to start..."
+#sleep 15
 
-cd /src
-
-
-dotnet new tool-manifest --force
-dotnet tool install dotnet-ef --version 9.* --local
+#cd /src
 
 
-if [ ! -d "Migrations" ] || [ -z "$(ls -A Migrations)" ]; then
-    echo "No migrations found, creating InitialCreate..."
-    dotnet tool run dotnet-ef migrations add InitialCreate --project SurveyBasket.csproj --startup-project SurveyBasket.csproj
-else
-    echo "Migrations already exist."
-fi
+#dotnet new tool-manifest --force
+#dotnet tool install dotnet-ef --version 9.* --local
 
 
-echo "Applying migrations..."
-dotnet tool run dotnet-ef database update --project SurveyBasket.csproj --startup-project SurveyBasket.csproj
+#if [ ! -d "Migrations" ] || [ -z "$(ls -A Migrations)" ]; then
+ #   echo "No migrations found, creating InitialCreate..."
+ #   dotnet tool run dotnet-ef migrations add InitialCreate --project SurveyBasket.csproj --startup-project SurveyBasket.csproj
+#else
+#    echo "Migrations already exist."
+#fi
 
 
-echo "Starting SurveyBasket API..."
-cd /app
+#echo "Applying migrations..."
+#dotnet tool run dotnet-ef database update --project SurveyBasket.csproj --startup-project SurveyBasket.csproj
+
+
+#echo "Starting SurveyBasket API..."
+#d /app
+
+
+
+set -e 
+
+
+echo " Secrets loaded successfully, starting SurveyBasket..."
 exec dotnet SurveyBasket.dll

@@ -9,27 +9,18 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=SurveyBasket;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
-      - ConnectionStrings__Redis=redis:6379
       - JwtSettings__Issuer=SurveyBasketAuthServer
       - JwtSettings__Audience=SurveyBasketClient
-      - JwtSettings__SecretKey=${JWT_SECRET}
+      - JwtSettings__SecretKey=${JwtSettings__SecretKey}
+      - ConnectionStrings__PostgreSql=${ConnectionStrings__PostgreSql}
+      - ConnectionStrings__HangfireConnection=${ConnectionStrings__HangfireConnection}
+      - HangfireSettings__Username=${HangfireSettings__Username}
+      - HangfireSettings__Password=${HangfireSettings__Password}
+      - MailSettings__Password=${MailSettings__Password}
+      - Admin__Password=${Admin__Password}
+      - ConnectionStrings__Redis=redis:6379
     depends_on:
-      - sqlserver
       - redis
-    networks:
-      - surveybasket-net
-
-  sqlserver:
-    container_name: surveybasket-sql
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=${SA_PASSWORD}
-    ports:
-      - "1433:1433"
-    volumes:
-      - sql_data:/var/opt/mssql
     networks:
       - surveybasket-net
 
@@ -40,6 +31,7 @@ services:
       - "6379:6379"
     networks:
       - surveybasket-net
+
   ops-seq:
     image: datalust/seq:latest
     container_name: ops-seq
@@ -51,14 +43,12 @@ services:
     networks:
       - surveybasket-net
     ports:
-      - 5341:5341
-      - 8081:80
-
+       - 5341:5341   # Serilog sends logs here
+       - 8081:80     # Seq dashboard web UI
 
 networks:
   surveybasket-net:
     driver: bridge
 
 volumes:
-  sql_data:
   seq_data:

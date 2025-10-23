@@ -22,21 +22,20 @@ builder.Host.UseSerilog((context, configuration) =>
 var app = builder.Build();
 
 
-if (app.Environment.IsDevelopment())
+
+app.UseHangfireDashboard("/jobs", new DashboardOptions
 {
-    app.UseHangfireDashboard("/jobs", new DashboardOptions
-    {
-        Authorization =
-        [
-            new HangfireCustomBasicAuthenticationFilter
+    Authorization =
+    [
+        new HangfireCustomBasicAuthenticationFilter
             {
                 User = app.Configuration["HangfireSettings:Username"],
                 Pass = app.Configuration["HangfireSettings:Password"]
             }
-        ],
-        DashboardTitle = "Survey Basket Dashboard"
-    });
-}
+    ],
+    DashboardTitle = "Survey Basket Dashboard"
+});
+
 
 
 
